@@ -1,0 +1,4 @@
+/home/mrvova/Kargin-CS-Labs-2Sem/CMakeFiles/Lab_2.dir
+/home/mrvova/Kargin-CS-Labs-2Sem/CMakeFiles/clang-format.dir
+/home/mrvova/Kargin-CS-Labs-2Sem/CMakeFiles/edit_cache.dir
+/home/mrvova/Kargin-CS-Labs-2Sem/CMakeFiles/rebuild_cache.dir

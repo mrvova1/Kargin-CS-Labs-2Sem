@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/Lab_2.dir/main.cpp.o CMakeFiles/Lab_2.dir/planets.cpp.o -o Lab_2 
