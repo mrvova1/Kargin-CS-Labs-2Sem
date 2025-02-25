@@ -168,7 +168,7 @@ std::ostream& operator << (std::ostream &os, const Planet &planet)
 
 std::istream& operator >> (std::istream& in, Planet& planet)
 {
-    std::cout << "Введите измененные данные" << '\n';
+    std::cout << "Введите новые данные" << '\n';
     std::cout << "Название: ";
     char temp_name[100];
     in >> temp_name;

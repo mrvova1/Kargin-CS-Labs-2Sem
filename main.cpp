@@ -1,7 +1,7 @@
 #include <iostream>
 #include "planets.h"
 
-int main() {
+int main(int argc, char* argv[]) {
     const int MAX_PLANETS = 120;
     const int MAX_NAME_LENGTH = 100;
     char file_name[MAX_NAME_LENGTH];
@@ -9,6 +9,7 @@ int main() {
     int n_planet = 0;
     int ind;
 
+    if (argc > 1 && strcmp(argv[1], "i") == 0) {
     while (true) {
         MenuOption choice = static_cast<MenuOption>(Planet::menu());
         switch (choice) {
@@ -53,5 +54,26 @@ int main() {
                 break;
         }
     }
+} else if (argc > 1 && strcmp(argv[1], "d") == 0) {
+    std::strcpy(file_name, "Sun.txt");
+    n_planet = Planet::read_db(file_name, planets, MAX_PLANETS);
+    Planet::print_db(planets, n_planet);
+    std::cout << '\n';
+
+    std::cin >> planets[2];
+    std::cout << planets[2];
+    Planet::sort_by_name(planets, n_planet);
+    Planet::print_db(planets, n_planet);
+    std::cout << '\n';
+
+    Planet::sort_db(planets, n_planet);
+    Planet::print_db(planets, n_planet);
+    std::cout << '\n';
+
+    Planet::add_planet(planets, n_planet);
+    Planet::delete_planet(planets, n_planet, 2);
+    Planet::print_db(planets, n_planet);
+
+}
     return 0;
 }
