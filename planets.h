@@ -38,10 +38,11 @@ public:
     int getLife() const;
     int getSatellite() const;
 
+    void clear();
     // Статические методы для работы с базой планет
-    static void add_planet(Planet* planets, int &n_planet);
+    static void add_planet(Planet*& planets, int &n_planet, int &capacity);
     static void delete_planet(Planet* planets, int &n_planet, int planet_index);
-    static int read_db(char* file_name, Planet* planets, const int Size);
+    static int read_db(char* file_name, Planet*& planets, int &Size, int &capacity);
     static int menu();
     static void print_db(Planet* planets, int n_planet);
     static int write_db(char* file_name, Planet* planets, int n_planet);

@@ -3,6 +3,17 @@
 #include <fstream>
 #include <cstring>
 
+void resize_planets(Planet*& planets, int n_planet, int &capacity) {
+    int new_capacity = capacity * 2;
+    Planet* new_planets = new Planet[new_capacity];
+    for (int i = 0; i < n_planet; i++){
+        new_planets[i] = planets[i];
+    }
+    delete[] planets;
+    planets = new_planets;
+    capacity = new_capacity;
+}
+
 Planet::Planet() : planet_(new char[1]), diameter_(0), life_(0), satellite_(0) {
     planet_[0] = '\0';
 }
@@ -55,7 +66,19 @@ int Planet::getSatellite() const {
     return satellite_;
 }
 
-void Planet::add_planet(Planet* planets, int &n_planet){
+void Planet::clear() {
+    delete[] planet_;
+    planet_ = new char[1];
+    planet_[0] = '\0';
+    diameter_ = 0;
+    life_ = 0;
+    satellite_ = 0;
+}
+
+void Planet::add_planet(Planet*& planets, int &n_planet, int &capacity){
+    if (n_planet >= capacity) {
+        resize_planets(planets, n_planet, capacity);
+    }
     Planet new_planet;
     std::cin >> new_planet;
     planets[n_planet] = new_planet;
@@ -63,20 +86,24 @@ void Planet::add_planet(Planet* planets, int &n_planet){
 }
 
 void Planet::delete_planet(Planet* planets, int &n_planet, int planet_index){
+    if (planet_index < 0 || planet_index >= n_planet) return;
     for (int i = planet_index; i < n_planet - 1; i++){
         planets[i] = planets[i+1];
     }
+    planets[n_planet - 1].clear();
     n_planet--;
 }
 
-int Planet::read_db(char* file_name, Planet* planets, const int Size) {
+int Planet::read_db(char* file_name, Planet*& planets, int &n_planet, int &capacity) {
     char name[100];
     int diameter = 0, life = 0, satellite = 0;
-    int n_planet = 0;
-
+    n_planet = 0;
     std::ifstream file(file_name);
     if (file) {
-        while (file >> name >> diameter >> life >> satellite && n_planet < Size) {
+        while (file >> name >> diameter >> life >> satellite) {
+            if(n_planet >= capacity) {
+                resize_planets(planets, n_planet, capacity);
+            }
             planets[n_planet] = Planet(name, diameter, life, satellite);
             n_planet++;
         }
@@ -102,10 +129,7 @@ int Planet::menu() {
 
 void Planet::print_db(Planet* planets, int n_planet) {
     for (int i = 0; i < n_planet; i++) {
-        std::cout << planets[i].getPlanet() << " "
-                  << planets[i].getDiameter() << " "
-                  << planets[i].getLife() << " "
-                  << planets[i].getSatellite() << '\n';
+        std::cout << planets[i] << std::endl;
     }
 }
 
@@ -113,10 +137,7 @@ int Planet::write_db(char* file_name, Planet* planets, int n_planet) {
     std::ofstream file(file_name);
     if (file) {
         for (int i = 0; i < n_planet; i++) {
-            file << planets[i].getPlanet() << " "
-                 << planets[i].getDiameter() << " "
-                 << planets[i].getLife() << " "
-                 << planets[i].getSatellite() << '\n';
+            file << planets[i] << std::endl;
         }
     }
     return 0;
@@ -160,10 +181,11 @@ void Planet::sort_by_name(Planet* planets, int n_planet) {
 
 std::ostream& operator << (std::ostream &os, const Planet &planet)
 {
-    return os << planet.getPlanet() << " "
-              << planet.getDiameter() << " "
-              << planet.getLife() << " "
-              << planet.getSatellite();
+    os << planet.planet_ << " "
+       << planet.diameter_ << " "
+       << planet.life_ << " "
+       << planet.satellite_;
+    return os;
 }
 
 std::istream& operator >> (std::istream& in, Planet& planet)
@@ -172,7 +194,6 @@ std::istream& operator >> (std::istream& in, Planet& planet)
     std::cout << "Название: ";
     char temp_name[100];
     in >> temp_name;
-
     int diameter = 0, life = 0, satellite = 0;
     std::cout << "Диаметр: ";
     in >> diameter;
