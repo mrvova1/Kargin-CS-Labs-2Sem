@@ -2,6 +2,7 @@
 #include "planets.h"
 #include <cstring>
 
+class
 int main(int argc, char* argv[]) {
     const int INITIAL_CAPACITY = 120;
     const int MAX_NAME_LENGTH = 100;
