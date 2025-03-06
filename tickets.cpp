@@ -165,17 +165,19 @@ void Flight::delete_ticket(Flight* tickets, int &n_tickets, int ticket_index) {
 }
 
 int Flight::read_db(char* file_name, Flight*& tickets, int &n_tickets, int &capacity) {
-    char date[100], time[100], airplane[100], first_name[100], last_name[100];
-    int price = 0;
+    // char date[100], time[100], airplane[100], first_name[100], last_name[100];
+
+    // int price = 0;
     n_tickets = 0;
+    Flight new_ticket;
 
     std::ifstream file(file_name);
     if (file) {
-        while (file >> date >> time >> price >> airplane >> first_name >> last_name) {
+        while (file >> new_ticket) {
             if(n_tickets >= capacity) {
                 resize_tickets(tickets, n_tickets, capacity);
             }
-            tickets[n_tickets] = Flight(date, time, price, airplane, first_name, last_name);
+            tickets[n_tickets] = new_ticket;
             n_tickets++;
         }
     }
@@ -283,6 +285,29 @@ std::istream& operator>>(std::istream& in, Flight& flight) {
     in >> temp_first_name;
 
     std::cout << "Фамилия владельца: ";
+    char temp_last_name[100];
+    in >> temp_last_name;
+
+    flight = Flight(temp_date, temp_time, price, temp_airplane, temp_first_name, temp_last_name);
+    return in;
+}
+
+std::ifstream& operator>>(std::ifstream& in, Flight& flight) {
+    char temp_date[100];
+    in >> temp_date;
+
+    char temp_time[100];
+    in >> temp_time;
+
+    int price = 0;
+    in >> price;
+
+    char temp_airplane[100];
+    in >> temp_airplane;
+
+    char temp_first_name[100];
+    in >> temp_first_name;
+
     char temp_last_name[100];
     in >> temp_last_name;
 

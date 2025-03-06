@@ -36,6 +36,7 @@ public:
 
     friend std::istream& operator>>(std::istream&, Flight&);
     friend std::ostream& operator<<(std::ostream &os, const Flight &flight);
+    friend std::ifstream& operator >> (std::ifstream& in, Flight& flight);
 
     char* getDate() const;
     char* getTime() const;
