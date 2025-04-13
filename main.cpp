@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 #include "MyStack.h"
 
 using namespace std;
@@ -25,11 +26,13 @@ int main() {
     std::cin >> n;
     MyStack<int> stack;
 
-    char abs[100];
+
+    char abs[20];
     std::cin >> abs;
     MyStack<char> absSt;
-    for (char i: abs){
-        absSt.push(i);
+    for (size_t i=0; i < std::strlen(abs); i++){
+        char ci = abs[i];
+        absSt.push(ci);
     }
     std::cout << absSt;
 

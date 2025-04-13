@@ -136,7 +136,7 @@ public:
         top = back;
     }
 
-    int operator [] (int num) const {
+    INF operator [] (int num) const {
         Node *temp = top;
         for (int i=0; i<num; i++){
             temp = temp->next;
