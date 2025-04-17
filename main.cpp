@@ -1,72 +1,56 @@
 #include <iostream>
-#include <cstring>
-#include "MyStack.h"
-
-using namespace std;
-
-void Multipliers(int n, MyStack<int> &stack) {
-    if(n <= 1)
-        return;
-    int divisor = 2;
-    while(n > 1) {
-        while(n % divisor == 0) {
-            stack.push(divisor);
-            n /= divisor;
-        }
-        divisor++;
-        if(divisor * divisor > n && n > 1) {
-            stack.push(n);
-            break;
-        }
-    }
-}
+#include "MySet.h"
 
 int main() {
-    int n = 3960;
-    std::cin >> n;
-    MyStack<int> stack;
+    MySet<int> set;
+    int choice, element;
 
+    std::cout << "Демонстрация работы MySet<int>" << std::endl;
 
-    char abs[20];
-    std::cin >> abs;
-    MyStack<char> absSt;
-    for (size_t i=0; i < std::strlen(abs); i++){
-        char ci = abs[i];
-        absSt.push(ci);
+    bool running = true;
+    while(running) {
+        std::cout << "\nТекущее множество: " << set;
+        std::cout << "Меню:\n";
+        std::cout << "1) Добавить элемент\n";
+        std::cout << "2) Удалить элемент\n";
+        std::cout << "3) Показать множество\n";
+        std::cout << "0) Выход\n";
+        std::cout << "Ваш выбор: ";
+        std::cin >> choice;
+
+        switch(choice) {
+            case 1:
+                std::cin.ignore();
+                std::cout << "Введите элемент для добавления: ";
+                std::cin >> element;
+                std::cout << "Введите элемент для добавления: ";
+
+                set.add_element(element);
+                std::cout << "Введите элемент для добавления: ";
+
+                std::cout << "Элемент " << element << " добавлен (если ранее отсутствовал)." << std::endl;
+                break;
+            case 2:
+                std::cin.ignore();
+                std::cout << "Введите элемент для удаления: ";
+                std::cin >> element;
+                set.delete_element(element);
+                std::cout << "Элемент " << element << " удалён (если присутствовал)." << std::endl;
+                break;
+            case 3:
+                std::cin.ignore();
+                std::cout << "Множество: " << set;
+                break;
+            case 0:
+                std::cin.ignore();
+                running = false;
+                break;
+            default:
+                std::cin.ignore();
+                std::cout << "Неверный выбор. Повторите ввод." << std::endl;
+                break;
+        }
     }
-    std::cout << absSt;
-
-
-    Multipliers(n, stack);
-
-    MyStack<int> copyStack = stack;
-    MyStack<int> factors;
-    factors = copyStack;
-    // while(!copyStack.empty()) {
-    //     factors.push(copyStack.top_inf());
-    //     copyStack.pop();
-    // }
-
-    cout << n << "=";
-    for (size_t i = 0; i < factors.len(); i++) {
-        cout << factors[i];
-        if(i < factors.len() - 1)
-            cout << " * ";
-    }
-    cout << endl;
-
-    // cout << n << "=";
-    // for (int i = factors.len() - 1; i >= 0; i--) {
-    //     cout << factors[i];
-    //     if(i > 0)
-    //         cout << " * ";
-    // }
-    // cout << endl;
-
-    // factors.inverted();
-    cout << n << "=";
-    cout << copyStack;
-
-
+    std::cout << "Завершение работы программы." << std::endl;
     return 0;
 }
