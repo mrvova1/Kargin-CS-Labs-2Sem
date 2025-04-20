@@ -46,6 +46,8 @@ int main() {
     //     factors.push(copyStack.top_inf());
     //     copyStack.pop();
     // }
+    // cout << factors << "factors";
+
 
     cout << n << "=";
     for (size_t i = 0; i < factors.len(); i++) {
@@ -64,6 +66,8 @@ int main() {
     // cout << endl;
 
     // factors.inverted();
+    cout << "======" << '\n';
+
     cout << n << "=";
     cout << copyStack;
 

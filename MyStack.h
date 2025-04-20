@@ -42,25 +42,28 @@ public:
     MyStack() : top(nullptr) {}
 
     MyStack(const MyStack &other) : top(nullptr) {
-        if(other.top)
-            top = new Node(*other.top);
+        for (size_t i=0; i < other.len(); i++){
+            push(other[i]);
+        }
     }
 
-    MyStack& operator=(const MyStack &other) {
+    MyStack& operator=(MyStack &other) {
         if(this != &other) {
             // this->empty();
             // other.empty();
+
             while(!empty()) {
                 pop();
             }
-            for (size_t i=0; i < other.len(); i++){
-                push(other[i]);
-            }
-            // while (!other.empty())
-            // {
-            //    push(other.pop());
+            // for (size_t i=0; i < other.len(); i++){
+            //     push(other[i]);
             // }
-
+            while (!other.empty())
+            {
+               push(other.pop());
+            //    std::cout << this;
+            }
+            inverted();
             // Node copy_node = other;
             // if (!copy_node){
             //     top = nullptr;
@@ -97,14 +100,17 @@ public:
         return true;
     }
 
-    bool pop() {
+    INF pop() {
+        // std::cout << "\\\\\\" << '\n';
         if(empty())
             return false;
+        INF n = top->d;
         Node* temp = top;
         top = top->next;
         temp->next = nullptr;
         delete temp;
-        return true;
+        // std::cout << n << '\n';
+        return n;
     }
 
     INF top_inf() const {
