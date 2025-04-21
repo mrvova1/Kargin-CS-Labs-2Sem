@@ -23,19 +23,25 @@ int main() {
                 std::cin.ignore();
                 std::cout << "Введите элемент для добавления: ";
                 std::cin >> element;
-                std::cout << "Введите элемент для добавления: ";
+                // std::cout << "Введите элемент для добавления: ";
 
-                set.add_element(element);
-                std::cout << "Введите элемент для добавления: ";
+                if (set.add_element(element)) {
+                    std::cout << "Элемент " << element << " добавлен" << std::endl;
+                } else {
+                    std::cout << "Элемент " << element << " уже в массиве" << std::endl;
+                }
+                // std::cout << "Введите элемент для добавления: ";
 
-                std::cout << "Элемент " << element << " добавлен (если ранее отсутствовал)." << std::endl;
                 break;
             case 2:
                 std::cin.ignore();
                 std::cout << "Введите элемент для удаления: ";
                 std::cin >> element;
-                set.delete_element(element);
-                std::cout << "Элемент " << element << " удалён (если присутствовал)." << std::endl;
+                if (set.delete_element(element)) {
+                    std::cout << "Элемент " << element << " удалён" << std::endl;
+                } else {
+                    std::cout << "Элемент " << element << " не присутствовал в массиве" << std::endl;
+                }
                 break;
             case 3:
                 std::cin.ignore();

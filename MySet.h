@@ -34,14 +34,17 @@ public:
     ~MyVector() { delete[] pdata_; }
 
     void add_element(INF new_element){
-        std::cout << max_size_ << '\n';
-        if (size_+1 >= max_size_/2){
+        // std::cout << max_size_ << '\n';
+        // std::cout << size_ << '\n';
+        size_+=1;
+
+        if (size_ >= max_size_/2){
             resize();
         }
-        std::cout << max_size_ << '\n';
-        pdata_[size_] = new_element;
-        size_+=1;
-        std::cout << max_size_ << '\n';
+        // std::cout << size_-1 << "aaaaaaaaaaaaaaaaa" << '\n';
+
+        pdata_[size_-1] = new_element;
+        // std::cout << max_size_ << '\n';
 
     }
 
@@ -60,58 +63,108 @@ public:
     }
 
     int find(INF el) {
-        size_t find_e = size_/2;
-        size_t find_zone = size_/4;
-        bool end = false;
-        std::cout << find_e << '\n';
-        std::cout << pdata_[find_e] << '\n';
-        std::cout << "el" << '\n';
-        std::cout << el << '\n';
-        while (pdata_[find_e] != el){
-            std::cout << "pdata_[find_e]" << '\n';
-            std::cout << pdata_[find_e] << '\n';
-            if (find_zone == 1){
-                end = true;
-            }
-            if (pdata_[find_e] < el){
-                find_e += find_zone;
-                find_zone /= 2;
+        if (size_ == 0){
+            return -1;
+        }
+        int left_b = 0;
+        int right_b = size_-1;
+        int mid = (right_b-left_b)/2+left_b;
+        while (pdata_[mid] != el){
+            if (pdata_[mid] > el){
+                right_b = mid-1;
             } else {
-                find_e -= find_zone;
-                find_zone /= 2;
+                left_b = mid+1;
             }
-            if (end){
+            mid = (right_b-left_b)/2+left_b;
+            if (right_b == left_b){
+                if (pdata_[mid] == el){
+                    break;
+                }
+                return -1;
+            }
+            if (right_b < 0 or left_b > static_cast<int>(size_)-1){
                 return -1;
             }
         }
-        std::cout << "]]]]]]]]]]]]]" << '\n';
-        std::cout << find_e << '\n';
-
-
-        return find_e;
+        return mid;
     }
+    // int find(INF el) {
+    //     if (size_ == 0){
+    //         return -1;
+    //     }
+    //     size_t find_e = size_/2;
+    //     const size_t min_find_zone = 1;
+    //     size_t find_zone = std::max(size_/4, min_find_zone);
+    //     bool end = false;
+    //     // std::cout << find_e << '\n';
+    //     // std::cout << find_zone << '\n';
+
+    //     // // std::cout << find_e << '\n';
+    //     // std::cout << pdata_[find_e] << '\n';
+    //     // std::cout << el << '\n';
+    //     // // std::cout << "el" << '\n';
+    //     // // std::cout << el << '\n';
+    //     // // std::cout << pdata_[find_e] != el << '\n';
+    //     // std::cout << "/////////////////////////" << '\n';
+
+    //     while (pdata_[find_e] != el){
+    //         // std::cout << "pdata_[find_e]" << '\n';
+    //         // std::cout << pdata_[find_e] << '\n';
+    //         // std::cout << find_zone << '\n';
+    //         if (find_zone <= 1){
+    //             end = true;
+    //         }
+    //         if (pdata_[find_e] < el){
+    //             find_e += find_zone;
+    //             find_zone /= 2;
+    //         } else {
+    //             find_e -= find_zone;
+    //             find_zone /= 2;
+    //         }
+    //         if (end){
+    //             if (pdata_[find_e] == el){
+    //                 return find_e;
+    //             }
+    //             if (pdata_[find_e-1] == el){
+    //                 return find_e-1;
+    //             }
+    //             if (pdata_[find_e+1] == el) {
+    //                 return find_e+1;
+    //             }
+    //             return -1;
+    //         }
+    //     }
+    //     // std::cout << "]]]]]]]]]]]]]" << '\n';
+    //     // std::cout << find_e << '\n';
+
+
+    //     return find_e;
+    // }
 
     void resize() {
-        if (size_ > max_size_/2) {
+        while (size_ > max_size_/2) {
             INF* new_pdata_ = new INF(max_size_*2);
             for (size_t i=0; i<max_size_; i++){
                 new_pdata_[i] = pdata_[i];
             }
             delete[] pdata_;
             pdata_ = new_pdata_;
-        } else if (size_ < max_size_/4) {
+            max_size_*=2;
+        }
+        while (size_ < max_size_/4) {
             INF* new_pdata_ = new INF(max_size_/2);
             for (size_t i=0; i<max_size_; i++){
                 new_pdata_[i] = pdata_[i];
             }
             delete[] pdata_;
             pdata_ = new_pdata_;
+            max_size_/=2;
         }
     }
 
     void sort(){
-        for (size_t i = 0; i<max_size_-1; i++){
-            for (size_t j = i+1; j<max_size_; j++){
+        for (size_t i = 0; i<size_-1; i++){
+            for (size_t j = i+1; j<size_; j++){
                 if (pdata_[j] < pdata_[i]){
                     INF move_el = pdata_[i];
                     pdata_[i] = pdata_[j];
@@ -138,24 +191,36 @@ template<class INF>
 class MySet: public MyVector<INF, MySet<INF>> {
 public:
     bool is_element(INF el){
-        std::cout << this->find(el) << '\n';
+        if (this->size_ == 0){
+            return false;
+        }
+        // std::cout << this->find(el) << '\n';
         if (this->find(el) != -1) {
             return true;
         }
         return false;
     }
 
-    void add_element(INF el){
+    bool add_element(INF el){
+        // std::cout << el << '\n';
+        // std::cout << is_element(el) << '\n';
+        // std::cout << "||||||||||||||" << '\n';
+
         if (not is_element(el)){
+
             this->MyVector<INF, MySet<INF>>::add_element(el);
             this->sort();
+            return true;
         }
+        return false;
     }
 
-    void delete_element(INF el){
+    bool delete_element(INF el){
         if (is_element(el)){
             this->MyVector<INF, MySet<INF>>::delete_element(this->find(el));
+            return true;
         }
+        return false;
     }
 
     void operator+=(const MySet& St){
