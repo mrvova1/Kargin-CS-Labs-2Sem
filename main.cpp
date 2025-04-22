@@ -2,8 +2,12 @@
 #include "MySet.h"
 
 int main() {
-    MySet<int> set;
-    int choice, element;
+    MySet<char*> set;
+
+    // int choice, element;
+
+    int choice;
+    char element[100];
 
     std::cout << "Демонстрация работы MySet<int>" << std::endl;
 
