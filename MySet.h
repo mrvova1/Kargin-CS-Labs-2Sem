@@ -5,305 +5,222 @@
 #include <iostream>
 #include <cstring>
 
-template<typename INF>
-class MyVector {
+class Term {
+private:
+    int k_ = 0;
+    int n_ = 0;
+public:
+    Term();
+    Term(int k) : k_(k) {}
+    Term(int k, int n) : k_(k), n_(n) {}
+    Term(const Term& other);
+    Term& operator=(const Term& other);
+    ~Term();
+
+    Term& operator+=(const Term& other){
+        if (n_ != other.n_){
+            std::cout<< "Нельзя складывать термы разной степени\n";
+            return *this;
+        }
+        k_ += other.k_;
+        return *this;
+    }
+
+    Term& operator*=(const Term& other){
+        n_ += other.n_;
+        k_ *= other.k_;
+        return *this;
+    }
+
+    Term operator+(const Term& other) {
+        Term new_term = *this;
+        new_term += other;
+        return new_term;
+    }
+
+    Term operator*(const Term& other) {
+        Term new_term = *this;
+        new_term *= other;
+        return new_term;
+    }
+
+    friend class Polynomial;
+};
+
+
+class Polynomial {
 private:
     size_t max_size_;
     size_t size_;
-    INF* pdata_;
+    Term* poly_;
+    int degree_;
+    bool order_;
 public:
-    MyVector(size_t max_size = 1);
-    MyVector(const MyVector& other);
-    MyVector& operator=(const MyVector& other);
-    ~MyVector();
+    Polynomial(size_t max_size = 1);
+    Polynomial(const Polynomial& other);
+    Polynomial& operator=(const Polynomial& other);
 
-    void add_element(INF new_element);
-    int delete_element(size_t index);
-    int find(INF el);
+    Polynomial() : max_size_(1), size_(0), degree_(0), order_(false), poly_(new Term[1]) {}
+
+    Polynomial(int k, bool order=false) : max_size_(1), size_(0), degree_(0), order_(order){
+        poly_ = new Term[1];
+        poly_[0] = Term(k);
+    }
+
+    Polynomial(Term new_Term, bool order=false) : max_size_(1), size_(0), degree_(0), order_(order){
+        poly_ = new Term[1];
+        poly_[0] = new_Term;
+    }
+
+    ~Polynomial();
+
+    void add_element(Term new_element);
+    Term delete_element(size_t index);
     void resize();
     void sort();
 
-    INF operator[](size_t num) const;
+    Polynomial operator+=(const Polynomial& other) {
+        bool have;
+        for (size_t i=0; i < other.len(); i++) {
+            have = false;
+            for (size_t j=0; j < len(); j++) {
+                if (poly_[j].n_ == other[i].n_) {
+                    poly_[j] += other[i];
+                    have = true;
+                    break;
+                }
+            }
+            if (not have){
+                add_element(other[i]);
+            }
+        }
+        return *this;
+    }
+
+    Polynomial operator*=(const Polynomial& other) {
+        for (size_t i=0; i < other.len(); i++) {
+            for (size_t j=0; j < len()-1; j++) {
+                add_element(poly_[j] * other[i]);
+            }
+            poly_[len()] *= other[i];
+        }
+        return *this;
+    }
+
+    friend Polynomial operator+(const Polynomial& first, const Polynomial& second);
+    friend Polynomial operator*(const Polynomial& first, const Polynomial& second);
+
+    Term operator[](size_t num) const;
     size_t len() const;
 };
 
-template<>
-int MyVector<char*>::find(char* el);
-
-template<>
-MyVector<char*>::~MyVector();
-
-template<>
-void MyVector<char*>::add_element(char* new_element);
-
-template<>
-int MyVector<char*>::delete_element(size_t index);
-
-template<typename INF>
-class MySet : public MyVector<INF> {
-public:
-    bool is_element(INF el);
-    bool add_element(INF el);
-    bool delete_element(INF el);
-
-    void operator+=(const MySet& St);
-    void operator-=(const MySet& St);
-    void operator*=(const MySet& St);
-
-    template<class I>
-    friend std::ostream& operator<<(std::ostream& os, const MySet<I>& St);
-
-    template<typename I>
-    friend MySet<I> operator*(const MySet<I>& f_st, const MySet<I>& s_st);
-    template<typename I>
-    friend MySet<I> operator+(const MySet<I>& f_st, const MySet<I>& s_st);
-    template<typename I>
-    friend MySet<I> operator-(const MySet<I>& f_st, const MySet<I>& s_st);
-    template<typename I>
-    friend bool operator==(const MySet<I>& f_st, const MySet<I>& s_st);
-};
-
-template<typename INF>
-std::ostream& operator<<(std::ostream& os, const MySet<INF>& St);
-
-template<typename INF>
-MyVector<INF>::MyVector(size_t max_size)
-    : max_size_(max_size), size_(0), pdata_(new INF[max_size]) {}
-
-template<typename INF>
-MyVector<INF>::MyVector(const MyVector& other)
-    : max_size_(other.max_size_), size_(other.size_), pdata_(new INF[other.max_size_]) {
-    for (size_t i = 0; i < max_size_; ++i) {
-        pdata_[i] = other.pdata_[i];
-    }
+Polynomial operator+(const Polynomial& first, const Polynomial& second) {
+    Polynomial new_Polynomial = first;
+    new_Polynomial += second;
+    return new_Polynomial;
 }
 
-template<typename INF>
-MyVector<INF>& MyVector<INF>::operator=(const MyVector& other) {
+Polynomial operator*(const Polynomial& first, const Polynomial& second) {
+    Polynomial new_Polynomial = first;
+    new_Polynomial *= second;
+    return new_Polynomial;
+}
+
+Polynomial::Polynomial(const Polynomial& other) {
+    order_ = other.order_;
+    max_size_ = other.max_size_;
+    size_ = other.size_;
+    poly_ = new Term[max_size_];
+    for (size_t i = 0; i < max_size_; ++i) {
+        poly_[i] = other.poly_[i];
+    }
+    degree_ = other.degree_;
+}
+
+Polynomial& Polynomial::operator=(const Polynomial& other) {
     if (this != &other) {
+        order_ = other.order_;
         max_size_ = other.max_size_;
         size_ = other.size_;
-        delete[] pdata_;
-        pdata_ = new INF[max_size_];
+        delete[] poly_;
+        poly_ = new Term[max_size_];
         for (size_t i = 0; i < max_size_; ++i) {
-            pdata_[i] = other.pdata_[i];
+            poly_[i] = other.poly_[i];
         }
+        degree_ = other.degree_;
     }
     return *this;
 }
 
-template<typename INF>
-MyVector<INF>::~MyVector() {
-    delete[] pdata_;
+
+Polynomial::~Polynomial() {
+    delete[] poly_;
 }
 
-template<typename INF>
-void MyVector<INF>::add_element(INF new_element) {
+
+void Polynomial::add_element(Term new_element) {
     ++size_;
     if (size_ >= max_size_ / 2) {
         resize();
     }
-    pdata_[size_ - 1] = new_element;
+    poly_[size_ - 1] = new_element;
+    sort();
 }
 
-template<typename INF>
-int MyVector<INF>::delete_element(size_t index) {
+
+Term Polynomial::delete_element(size_t index) {
     if (index >= size_ - 1) {
         std::cout << "Индекс превосходит размер массива";
         return -1;
     }
     for (size_t i = index + 1; i < max_size_; ++i) {
-        pdata_[i - 1] = pdata_[i];
+        poly_[i - 1] = poly_[i];
     }
-    pdata_[size_ - 1] = 0;
+    poly_[size_ - 1] = 0;
     --size_;
     resize();
     return 0;
 }
 
-template<typename INF>
-int MyVector<INF>::find(INF el) {
-    if (size_ == 0) return -1;
-    int left_b = 0;
-    int right_b = size_ - 1;
-    int mid = (right_b - left_b) / 2 + left_b;
-    while (pdata_[mid] != el) {
-        if (pdata_[mid] > el)
-            right_b = mid - 1;
-        else
-            left_b = mid + 1;
-        mid = (right_b - left_b) / 2 + left_b;
-        if (right_b == left_b) {
-            if (pdata_[mid] == el) break;
-            return -1;
-        }
-        if (right_b < 0 || left_b > static_cast<int>(size_) - 1) return -1;
-    }
-    return mid;
-}
 
-template<typename INF>
-void MyVector<INF>::resize() {
+void Polynomial::resize() {
     while (size_ > max_size_ / 2) {
-        INF* new_pdata = new INF[max_size_ * 2];
-        for (size_t i = 0; i < max_size_; ++i) new_pdata[i] = pdata_[i];
-        delete[] pdata_;
-        pdata_ = new_pdata;
+        Term* new_pdata = new Term[max_size_ * 2];
+        for (size_t i = 0; i < max_size_; ++i) new_pdata[i] = poly_[i];
+        delete[] poly_;
+        poly_ = new_pdata;
         max_size_ *= 2;
     }
     while (size_ < max_size_ / 4) {
-        INF* new_pdata = new INF[max_size_ / 2];
-        for (size_t i = 0; i < max_size_; ++i) new_pdata[i] = pdata_[i];
-        delete[] pdata_;
-        pdata_ = new_pdata;
+        Term* new_pdata = new Term[max_size_ / 2];
+        for (size_t i = 0; i < max_size_; ++i) new_pdata[i] = poly_[i];
+        delete[] poly_;
+        poly_ = new_pdata;
         max_size_ /= 2;
     }
 }
 
-template<typename INF>
-void MyVector<INF>::sort() {
+
+void Polynomial::sort() {
     for (size_t i = 0; i < size_ - 1; ++i) {
         for (size_t j = i + 1; j < size_; ++j) {
-            if (pdata_[j] < pdata_[i]) {
-                INF tmp = pdata_[i];
-                pdata_[i] = pdata_[j];
-                pdata_[j] = tmp;
+            if (order_ == (poly_[j].n_ < poly_[i].n_)) {
+                Term tmp = poly_[i];
+                poly_[i] = poly_[j];
+                poly_[j] = tmp;
             }
         }
     }
 }
 
-template<typename INF>
-INF MyVector<INF>::operator[](size_t num) const {
-    return pdata_[num];
+
+Term Polynomial::operator[](size_t num) const {
+    return poly_[num];
 }
 
-template<typename INF>
-size_t MyVector<INF>::len() const {
+
+size_t Polynomial::len() const {
     return size_;
-}
-
-template<>
-int MyVector<char*>::find(char* el) {
-    for (size_t i = 0; i < size_; ++i) {
-        if (std::strcmp(pdata_[i], el) == 0) return i;
-    }
-    return -1;
-}
-
-template<>
-MyVector<char*>::~MyVector() {
-    for (size_t i = 0; i < size_; ++i) delete[] pdata_[i];
-    delete[] pdata_;
-}
-
-template<>
-void MyVector<char*>::add_element(char* new_element) {
-    ++size_;
-    if (size_ >= max_size_ / 2) resize();
-    delete[] pdata_[size_ - 1];
-    pdata_[size_ - 1] = new char[std::strlen(new_element) + 1];
-    std::strcpy(pdata_[size_ - 1], new_element);
-}
-
-template<>
-int MyVector<char*>::delete_element(size_t index) {
-    if (index >= size_ - 1) {
-        std::cout << "Индекс превосходит размер массива";
-        return -1;
-    }
-    for (size_t i = index + 1; i < max_size_; ++i) {
-        pdata_[i - 1] = pdata_[i];
-    }
-    delete[] pdata_[size_ - 1];
-    --size_;
-    resize();
-    return 0;
-}
-
-template<typename INF>
-bool MySet<INF>::is_element(INF el) {
-    if (this->len() == 0) return false;
-    return this->find(el) != -1;
-}
-
-template<typename INF>
-bool MySet<INF>::add_element(INF el) {
-    if (!is_element(el)) {
-        this->MyVector<INF>::add_element(el);
-        this->sort();
-        return true;
-    }
-    return false;
-}
-
-template<typename INF>
-bool MySet<INF>::delete_element(INF el) {
-    if (is_element(el)) {
-        this->MyVector<INF>::delete_element(this->find(el));
-        return true;
-    }
-    return false;
-}
-
-template<typename INF>
-void MySet<INF>::operator+=(const MySet& St) {
-    for (size_t i = 0; i < St.len(); ++i) {
-        if (!is_element(St[i])) add_element(St[i]);
-    }
-}
-
-template<typename INF>
-void MySet<INF>::operator-=(const MySet& St) {
-    for (size_t i = 0; i < St.len(); ++i) {
-        if (is_element(St[i])) delete_element(St[i]);
-    }
-}
-
-template<typename INF>
-void MySet<INF>::operator*=(const MySet& St) {
-    for (size_t i = 0; i < this->len(); ++i) {
-        if (!St.is_element(this->operator[](i))) delete_element(this->operator[](i));
-    }
-}
-
-template<typename INF>
-MySet<INF> operator*(const MySet<INF>& f_st, const MySet<INF>& s_st) {
-    MySet<INF> new_v = f_st;
-    new_v *= s_st;
-    return new_v;
-}
-
-template<typename INF>
-MySet<INF> operator+(const MySet<INF>& f_st, const MySet<INF>& s_st) {
-    MySet<INF> new_v = f_st;
-    new_v += s_st;
-    return new_v;
-}
-
-template<typename INF>
-MySet<INF> operator-(const MySet<INF>& f_st, const MySet<INF>& s_st) {
-    MySet<INF> new_v = f_st;
-    new_v -= s_st;
-    return new_v;
-}
-
-template<typename INF>
-MySet<INF> operator==(const MySet<INF>& f_st, const MySet<INF>& s_st) {
-    if (f_st.len() != s_st.len()) return false;
-    for (size_t i = 0; i < f_st.len(); ++i) {
-        if (f_st[i] != s_st[i]) return false;
-    }
-    return true;
-}
-
-template<typename INF>
-std::ostream& operator<<(std::ostream& os, const MySet<INF>& St) {
-    for (size_t i = 0; i < St.len(); ++i) {
-        std::cout << St[i] << ' ';
-    }
-    std::cout << std::endl;
-    return os;
 }
 
 #endif // MYSET_H
