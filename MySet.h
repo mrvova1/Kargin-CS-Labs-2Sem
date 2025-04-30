@@ -1,4 +1,3 @@
-// MySet.h
 #ifndef MYSET_H
 #define MYSET_H
 
@@ -7,220 +6,302 @@
 
 class Term {
 private:
-    int k_ = 0;
-    int n_ = 0;
+    int k_;
+    int n_;
 public:
     Term();
-    Term(int k) : k_(k) {}
-    Term(int k, int n) : k_(k), n_(n) {}
-    Term(const Term& other);
-    Term& operator=(const Term& other);
-    ~Term();
-
-    Term& operator+=(const Term& other){
-        if (n_ != other.n_){
-            std::cout<< "Нельзя складывать термы разной степени\n";
-            return *this;
-        }
-        k_ += other.k_;
-        return *this;
-    }
-
-    Term& operator*=(const Term& other){
-        n_ += other.n_;
-        k_ *= other.k_;
-        return *this;
-    }
-
-    Term operator+(const Term& other) {
-        Term new_term = *this;
-        new_term += other;
-        return new_term;
-    }
-
-    Term operator*(const Term& other) {
-        Term new_term = *this;
-        new_term *= other;
-        return new_term;
-    }
-
-    friend class Polynomial;
+    Term(int k, int n=0);
+    Term(char* is);
+    int degree() const;
+    int coeff() const;
+    Term& operator+=(const Term& other);
+    friend Term operator+(const Term& a, const Term& b);
+    friend std::istream& operator>>(std::istream& is, Term& term);
+    friend std::ostream& operator<<(std::ostream& os, const Term& term);
 };
-
 
 class Polynomial {
 private:
-    size_t max_size_;
-    size_t size_;
-    Term* poly_;
-    int degree_;
-    bool order_;
+    Term* terms_;
+    int size_;
+    int capacity_;
+    void ensure_capacity();
+    void sort_desc();
 public:
-    Polynomial(size_t max_size = 1);
+    Polynomial();
     Polynomial(const Polynomial& other);
     Polynomial& operator=(const Polynomial& other);
-
-    Polynomial() : max_size_(1), size_(0), degree_(0), order_(false), poly_(new Term[1]) {}
-
-    Polynomial(int k, bool order=false) : max_size_(1), size_(0), degree_(0), order_(order){
-        poly_ = new Term[1];
-        poly_[0] = Term(k);
-    }
-
-    Polynomial(Term new_Term, bool order=false) : max_size_(1), size_(0), degree_(0), order_(order){
-        poly_ = new Term[1];
-        poly_[0] = new_Term;
-    }
-
     ~Polynomial();
-
-    void add_element(Term new_element);
-    Term delete_element(size_t index);
-    void resize();
-    void sort();
-
-    Polynomial operator+=(const Polynomial& other) {
-        bool have;
-        for (size_t i=0; i < other.len(); i++) {
-            have = false;
-            for (size_t j=0; j < len(); j++) {
-                if (poly_[j].n_ == other[i].n_) {
-                    poly_[j] += other[i];
-                    have = true;
-                    break;
-                }
-            }
-            if (not have){
-                add_element(other[i]);
-            }
-        }
-        return *this;
-    }
-
-    Polynomial operator*=(const Polynomial& other) {
-        for (size_t i=0; i < other.len(); i++) {
-            for (size_t j=0; j < len()-1; j++) {
-                add_element(poly_[j] * other[i]);
-            }
-            poly_[len()] *= other[i];
-        }
-        return *this;
-    }
-
-    friend Polynomial operator+(const Polynomial& first, const Polynomial& second);
-    friend Polynomial operator*(const Polynomial& first, const Polynomial& second);
-
-    Term operator[](size_t num) const;
-    size_t len() const;
+    void add_term(const Term& t);
+    friend Polynomial operator+(const Polynomial& a, const Polynomial& b);
+    friend Polynomial operator*(const Polynomial& a, const Polynomial& b);
+    friend std::istream& operator>>(std::istream& is, Polynomial& poly);
+    friend std::ostream& operator<<(std::ostream& os, const Polynomial& poly);
 };
 
-Polynomial operator+(const Polynomial& first, const Polynomial& second) {
-    Polynomial new_Polynomial = first;
-    new_Polynomial += second;
-    return new_Polynomial;
+Term::Term(): k_(0), n_(0) {}
+Term::Term(int k, int n): k_(k), n_(n) {}
+int Term::degree() const { return n_; }
+int Term::coeff() const { return k_; }
+Term& Term::operator+=(const Term& other) {
+    if (n_ == other.n_) k_ += other.k_;
+    return *this;
+}
+Term operator+(const Term& a, const Term& b) {
+    Term r = a;
+    r += b;
+    return r;
 }
 
-Polynomial operator*(const Polynomial& first, const Polynomial& second) {
-    Polynomial new_Polynomial = first;
-    new_Polynomial *= second;
-    return new_Polynomial;
-}
+std::istream& operator>>(std::istream& is, Term& term) {
+    char cterm[1000];
+    is.getline(cterm, 1000);
+    int pk = 1;
+    int k = 0;
+    int pn = 1;
+    int n = 0;
+    int j = 0;
 
-Polynomial::Polynomial(const Polynomial& other) {
-    order_ = other.order_;
-    max_size_ = other.max_size_;
-    size_ = other.size_;
-    poly_ = new Term[max_size_];
-    for (size_t i = 0; i < max_size_; ++i) {
-        poly_[i] = other.poly_[i];
+    while (cterm[j] == ' ')
+    {
+        j += 1;
     }
-    degree_ = other.degree_;
+    for (int i = j; true; i++){
+        if (cterm[i] == ' '){
+            break;
+        }
+        if (cterm[i] == '-'){
+            pk = -1;
+            continue;
+        }
+        if (cterm[i] == 'x'){
+            break;
+        }
+        if (not isdigit(cterm[i])){
+            term = Term();
+            return is;
+        }
+        k *= 10;
+        k += (static_cast<int>(cterm[i]) - static_cast<int>('0'));
+        j+=1;
+    }
+
+    j+=1;
+
+    while (cterm[j] == ' ' or cterm[j] == '^' or cterm[j] == 'x')
+    {
+        j += 1;
+    }
+
+    for (int i = j; i < static_cast<int>(std::strlen(cterm)); i++){
+        if (cterm[i] == ' '){
+            break;
+        }
+        if (cterm[i] == '-'){
+            pn = -1;
+            continue;
+        }
+        if (not isdigit(cterm[i])){
+            term = Term();
+            return is;
+        }
+        n *= 10;
+        n += (static_cast<int>(cterm[i]) - static_cast<int>('0'));
+        j+=1;
+    }
+
+    term = Term(k * pk, n * pn);
+    std::cout << k << ' ' << pk << ' ' << n << ' ' << pn << ' ';
+    return is;
+}
+// std::istream& operator>>(std::istream& is, Term& term) {
+//     char c;
+//     while (is.peek() == ' ' || is.peek() == '\t' || is.peek() == '\n') {
+//         is.get();
+//     }
+//     if (!is.good()) return is;
+//     int sign = 1;
+//     if (is.peek() == '+' || is.peek() == '-') {
+//         is.get(c);
+//         if (c == '-') sign = -1;
+//     }
+//     int k = 0;
+//     bool haveDigit = false;
+//     while (std::isdigit(is.peek())) {
+//         is.get(c);
+//         haveDigit = true;
+//         k = k * 10 + (c - '0');
+//     }
+//     if (!haveDigit) k = 1;
+//     k *= sign;
+//     int n = 0;
+//     if (is.peek() == 'x') {
+//         is.get();
+//         n = 1;
+//         if (is.peek() == '^') {
+//             is.get();
+//             n = 0;
+//             while (std::isdigit(is.peek())) {
+//                 is.get(c);
+//                 n = n * 10 + (c - '0');
+//             }
+//         }
+//     }
+//     term = Term(k, n);
+//     return is;
+// }
+
+
+std::ostream& operator<<(std::ostream& os, const Term& term) {
+    int k = term.k_;
+    int n = term.n_;
+    if (k == 0) {
+        os << '0';
+        return os;
+    }
+    if (n == 0) {
+        os << k;
+        return os;
+    }
+    if (k == -1) os << '-';
+    else if (k != 1) os << k;
+    os << 'x';
+    if (n != 1) os << '^' << n;
+    return os;
 }
 
+Polynomial::Polynomial(): terms_(new Term[4]), size_(0), capacity_(4) {}
+Polynomial::Polynomial(const Polynomial& other): terms_(new Term[other.capacity_]), size_(other.size_), capacity_(other.capacity_) {
+    for (int i = 0; i < size_; ++i) terms_[i] = other.terms_[i];
+}
 Polynomial& Polynomial::operator=(const Polynomial& other) {
     if (this != &other) {
-        order_ = other.order_;
-        max_size_ = other.max_size_;
+        delete[] terms_;
+        capacity_ = other.capacity_;
         size_ = other.size_;
-        delete[] poly_;
-        poly_ = new Term[max_size_];
-        for (size_t i = 0; i < max_size_; ++i) {
-            poly_[i] = other.poly_[i];
-        }
-        degree_ = other.degree_;
+        terms_ = new Term[capacity_];
+        for (int i = 0; i < size_; ++i) terms_[i] = other.terms_[i];
     }
     return *this;
 }
-
-
-Polynomial::~Polynomial() {
-    delete[] poly_;
+Polynomial::~Polynomial() { delete[] terms_; }
+void Polynomial::ensure_capacity() {
+    if (size_ < capacity_) return;
+    int newCap = capacity_ * 2;
+    Term* tmp = new Term[newCap];
+    for (int i = 0; i < size_; ++i) tmp[i] = terms_[i];
+    delete[] terms_;
+    terms_ = tmp;
+    capacity_ = newCap;
 }
-
-
-void Polynomial::add_element(Term new_element) {
-    ++size_;
-    if (size_ >= max_size_ / 2) {
-        resize();
-    }
-    poly_[size_ - 1] = new_element;
-    sort();
-}
-
-
-Term Polynomial::delete_element(size_t index) {
-    if (index >= size_ - 1) {
-        std::cout << "Индекс превосходит размер массива";
-        return -1;
-    }
-    for (size_t i = index + 1; i < max_size_; ++i) {
-        poly_[i - 1] = poly_[i];
-    }
-    poly_[size_ - 1] = 0;
-    --size_;
-    resize();
-    return 0;
-}
-
-
-void Polynomial::resize() {
-    while (size_ > max_size_ / 2) {
-        Term* new_pdata = new Term[max_size_ * 2];
-        for (size_t i = 0; i < max_size_; ++i) new_pdata[i] = poly_[i];
-        delete[] poly_;
-        poly_ = new_pdata;
-        max_size_ *= 2;
-    }
-    while (size_ < max_size_ / 4) {
-        Term* new_pdata = new Term[max_size_ / 2];
-        for (size_t i = 0; i < max_size_; ++i) new_pdata[i] = poly_[i];
-        delete[] poly_;
-        poly_ = new_pdata;
-        max_size_ /= 2;
-    }
-}
-
-
-void Polynomial::sort() {
-    for (size_t i = 0; i < size_ - 1; ++i) {
-        for (size_t j = i + 1; j < size_; ++j) {
-            if (order_ == (poly_[j].n_ < poly_[i].n_)) {
-                Term tmp = poly_[i];
-                poly_[i] = poly_[j];
-                poly_[j] = tmp;
+void Polynomial::add_term(const Term& t) {
+    for (int i = 0; i < size_; ++i) {
+        if (terms_[i].degree() == t.degree()) {
+            terms_[i] += t;
+            if (terms_[i].coeff() == 0) {
+                for (int j = i; j < size_ - 1; ++j) terms_[j] = terms_[j+1];
+                size_--;
             }
+            return;
         }
     }
+    ensure_capacity();
+    terms_[size_++] = t;
+}
+void Polynomial::sort_desc() {
+    for (int i = 0; i < size_ - 1; ++i)
+        for (int j = i + 1; j < size_; ++j)
+            if (terms_[j].degree() > terms_[i].degree()) {
+                Term tmp = terms_[i];
+                terms_[i] = terms_[j];
+                terms_[j] = tmp;
+            }
+}
+// std::istream& operator>>(std::istream& is, Polynomial& poly) {
+//     poly.size_ = 0;
+//     char c;
+//     while (true) {
+//         while (is.peek() == ' ' || is.peek() == '\t') is.get();
+//         if (!is.good() || is.peek() == '\n') {
+//             if (is.peek() == '\n') is.get();
+//             break;
+//         }
+//         int sign = 1;
+//         if (is.peek() == '+' || is.peek() == '-') {
+//             is.get(c);
+//             if (c == '-') sign = -1;
+//         }
+//         int k = 0; bool have = false;
+//         while (std::isdigit(is.peek())) { is.get(c); have = true; k = k*10 + (c - '0'); }
+//         if (!have) k = 1;
+//         k *= sign;
+//         int n = 0;
+//         if (is.peek() == 'x') {
+//             is.get(); n = 1;
+//             if (is.peek() == '^') {
+//                 is.get(); n = 0;
+//                 while (std::isdigit(is.peek())) { is.get(c); n = n*10 + (c - '0'); }
+//             }
+//         }
+//         poly.add_term(Term(k,n));
+//     }
+//     poly.sort_desc();
+//     return is;
+// }
+
+std::istream& operator>>(std::istream& is, Polynomial& poly) {
+    char cpol[1000];
+    is.getline(cpol, 1000);
+    int i = 0;
+    int ij = 0;
+    int j = 0;
+    while (true)
+    {
+        while (cpol[j] != 'x'){ j+=1; }
+        j+=1;
+        ij = j;
+        while (cpol[i] != '^'){ if (isdigit(cpol[i])) {j-=1; continue;} }
+        while (cpol[i] == ' '){ i+=1; }
+        while (isdigit(cpol[i])){ j+=1; }
+        poly.add_term(Term());
+
+    }
+
+    return is;
 }
 
-
-Term Polynomial::operator[](size_t num) const {
-    return poly_[num];
+std::ostream& operator<<(std::ostream& os, const Polynomial& poly) {
+    if (poly.size_ == 0) { os << '0'; return os; }
+    for (int i = 0; i < poly.size_; ++i) {
+        int k = poly.terms_[i].coeff();
+        int n = poly.terms_[i].degree();
+        if (i > 0) os << (k >= 0 ? " + " : " - ");
+        else if (k < 0) os << '-';
+        int absK = k < 0 ? -k : k;
+        if (n == 0) os << absK;
+        else {
+            if (absK != 1) os << absK;
+            os << 'x';
+            if (n != 1) os << '^' << n;
+        }
+    }
+    return os;
 }
 
-
-size_t Polynomial::len() const {
-    return size_;
+Polynomial operator+(const Polynomial& a, const Polynomial& b) {
+    Polynomial r = a;
+    for (int i = 0; i < b.size_; ++i) r.add_term(b.terms_[i]);
+    r.sort_desc();
+    return r;
+}
+Polynomial operator*(const Polynomial& a, const Polynomial& b) {
+    Polynomial r;
+    for (int i = 0; i < a.size_; ++i)
+        for (int j = 0; j < b.size_; ++j)
+            r.add_term(Term(a.terms_[i].coeff() * b.terms_[j].coeff(),
+                           a.terms_[i].degree() + b.terms_[j].degree()));
+    r.sort_desc();
+    return r;
 }
 
 #endif // MYSET_H
