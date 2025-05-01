@@ -11,7 +11,7 @@ private:
 public:
     Term();
     Term(int k, int n=0);
-    Term(char* is);
+    Term(char* cterm);
     int degree() const;
     int coeff() const;
     Term& operator+=(const Term& other);
@@ -19,6 +19,77 @@ public:
     friend std::istream& operator>>(std::istream& is, Term& term);
     friend std::ostream& operator<<(std::ostream& os, const Term& term);
 };
+
+Term::Term(char* cterm) {
+    int pk = 1;
+    int k = 0;
+    int pn = 1;
+    int n = 0;
+    int j = 0;
+
+    while (cterm[j] == ' ')
+    {
+        j += 1;
+    }
+    if (cterm[j] == '-'){
+        pk = -1;
+        j+=1;
+    }
+    while (cterm[j] == ' ')
+    {
+        j += 1;
+    }
+    for (int i = j; true; i++){
+        if (cterm[i] == ' '){
+            break;
+        }
+        if (cterm[i] == 'x'){
+            break;
+        }
+        if (not isdigit(cterm[i])){
+            k_ = 0;
+            n_ = 0;
+            return;
+        }
+        k *= 10;
+        k += (static_cast<int>(cterm[i]) - static_cast<int>('0'));
+        j+=1;
+    }
+
+    j+=1;
+
+    while (cterm[j] == ' ' or cterm[j] == '^' or cterm[j] == 'x')
+    {
+        j += 1;
+    }
+    if (cterm[j] == '-'){
+        pn = -1;
+        j+=1;
+    }
+    while (cterm[j] == ' ')
+    {
+        j += 1;
+    }
+    for (int i = j; i < static_cast<int>(std::strlen(cterm)); i++){
+        if (cterm[i] == ' '){
+            break;
+        }
+
+        if (not isdigit(cterm[i])){
+            k_ = 0;
+            n_ = 0;
+            return;
+        }
+        n *= 10;
+        n += (static_cast<int>(cterm[i]) - static_cast<int>('0'));
+        j+=1;
+    }
+
+    // term = Term(k * pk, n * pn);
+    k_ = k * pk;
+    n_ = n * pn;
+    return;
+}
 
 class Polynomial {
 private:
@@ -56,62 +127,7 @@ Term operator+(const Term& a, const Term& b) {
 std::istream& operator>>(std::istream& is, Term& term) {
     char cterm[1000];
     is.getline(cterm, 1000);
-    int pk = 1;
-    int k = 0;
-    int pn = 1;
-    int n = 0;
-    int j = 0;
-
-    while (cterm[j] == ' ')
-    {
-        j += 1;
-    }
-    for (int i = j; true; i++){
-        if (cterm[i] == ' '){
-            break;
-        }
-        if (cterm[i] == '-'){
-            pk = -1;
-            continue;
-        }
-        if (cterm[i] == 'x'){
-            break;
-        }
-        if (not isdigit(cterm[i])){
-            term = Term();
-            return is;
-        }
-        k *= 10;
-        k += (static_cast<int>(cterm[i]) - static_cast<int>('0'));
-        j+=1;
-    }
-
-    j+=1;
-
-    while (cterm[j] == ' ' or cterm[j] == '^' or cterm[j] == 'x')
-    {
-        j += 1;
-    }
-
-    for (int i = j; i < static_cast<int>(std::strlen(cterm)); i++){
-        if (cterm[i] == ' '){
-            break;
-        }
-        if (cterm[i] == '-'){
-            pn = -1;
-            continue;
-        }
-        if (not isdigit(cterm[i])){
-            term = Term();
-            return is;
-        }
-        n *= 10;
-        n += (static_cast<int>(cterm[i]) - static_cast<int>('0'));
-        j+=1;
-    }
-
-    term = Term(k * pk, n * pn);
-    std::cout << k << ' ' << pk << ' ' << n << ' ' << pn << ' ';
+    term = Term(cterm);
     return is;
 }
 // std::istream& operator>>(std::istream& is, Term& term) {
@@ -249,22 +265,39 @@ void Polynomial::sort_desc() {
 //     return is;
 // }
 
+char* slice(char* s, int from, int to)
+{
+    s[to+1] = 0;
+    return s+from;
+};
+
+bool end(char cpol[1000], int j){
+    return j > static_cast<int>(std::strlen(cpol));
+}
+
 std::istream& operator>>(std::istream& is, Polynomial& poly) {
     char cpol[1000];
     is.getline(cpol, 1000);
     int i = 0;
-    int ij = 0;
+    // int ij = 0;
     int j = 0;
+    bool short_T;
+    char slice_cpol[1000];
     while (true)
     {
-        while (cpol[j] != 'x'){ j+=1; }
+        while (cpol[j] != 'x'){ j+=1; if (end(cpol, j)) {break;}}
+        if (end(cpol, j)) {break;}
         j+=1;
-        ij = j;
-        while (cpol[i] != '^'){ if (isdigit(cpol[i])) {j-=1; continue;} }
-        while (cpol[i] == ' '){ i+=1; }
-        while (isdigit(cpol[i])){ j+=1; }
-        poly.add_term(Term());
-
+        // ij = j;
+        short_T = false;
+        while (cpol[j] != '^'){j+=1; if (cpol[j] == '-' or cpol[j] == '+') {j-=1; short_T = true; break;} }
+        j+=1;
+        if (short_T) { poly.add_term(Term(slice(cpol, i, j+1))); i=j+1; continue; }
+        while (cpol[j] == ' '){ j+=1; }
+        while (isdigit(cpol[j])){ j+=1; }
+        std::strcpy(slice_cpol, cpol);
+        Term s = Term(slice(slice_cpol, i, j+1));
+        poly.add_term(s); i=j+1; continue;
     }
 
     return is;
