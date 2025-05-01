@@ -26,6 +26,7 @@ Term::Term(char* cterm) {
     int pn = 1;
     int n = 0;
     int j = 0;
+    bool is_k = false;
 
     while (cterm[j] == ' ')
     {
@@ -35,10 +36,14 @@ Term::Term(char* cterm) {
         pk = -1;
         j+=1;
     }
+    if (cterm[j] == '+'){
+        j+=1;
+    }
     while (cterm[j] == ' ')
     {
         j += 1;
     }
+
     for (int i = j; true; i++){
         if (cterm[i] == ' '){
             break;
@@ -54,6 +59,8 @@ Term::Term(char* cterm) {
         k *= 10;
         k += (static_cast<int>(cterm[i]) - static_cast<int>('0'));
         j+=1;
+        is_k = true;
+
     }
 
     j+=1;
@@ -88,6 +95,9 @@ Term::Term(char* cterm) {
     // term = Term(k * pk, n * pn);
     k_ = k * pk;
     n_ = n * pn;
+    if (not is_k) {
+        k_ = pk;
+    }
     return;
 }
 
@@ -176,10 +186,10 @@ std::ostream& operator<<(std::ostream& os, const Term& term) {
         return os;
     }
     if (n == 0) {
-        os << k;
+        os << k << 'x';
         return os;
     }
-    if (k == -1) os << '-';
+    if (k <= -1) os << '-';
     else if (k != 1) os << k;
     os << 'x';
     if (n != 1) os << '^' << n;
@@ -306,12 +316,13 @@ std::istream& operator>>(std::istream& is, Polynomial& poly) {
 std::ostream& operator<<(std::ostream& os, const Polynomial& poly) {
     if (poly.size_ == 0) { os << '0'; return os; }
     for (int i = 0; i < poly.size_; ++i) {
+
         int k = poly.terms_[i].coeff();
         int n = poly.terms_[i].degree();
         if (i > 0) os << (k >= 0 ? " + " : " - ");
         else if (k < 0) os << '-';
         int absK = k < 0 ? -k : k;
-        if (n == 0) os << absK;
+        if (n == 0) os << absK << 'x';
         else {
             if (absK != 1) os << absK;
             os << 'x';
