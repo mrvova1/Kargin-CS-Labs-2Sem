@@ -21,6 +21,7 @@ public:
 };
 
 Term::Term(char* cterm) {
+    std::cout << cterm << '\n';
     int pk = 1;
     int k = 0;
     int pn = 1;
@@ -316,18 +317,22 @@ std::istream& operator>>(std::istream& is, Polynomial& poly) {
 std::ostream& operator<<(std::ostream& os, const Polynomial& poly) {
     if (poly.size_ == 0) { os << '0'; return os; }
     for (int i = 0; i < poly.size_; ++i) {
+        // std::cout << poly.terms_[i] << '\n';
 
         int k = poly.terms_[i].coeff();
         int n = poly.terms_[i].degree();
         if (i > 0) os << (k >= 0 ? " + " : " - ");
         else if (k < 0) os << '-';
         int absK = k < 0 ? -k : k;
-        if (n == 0) os << absK << 'x';
+        if (n == 0) os << absK;
         else {
             if (absK != 1) os << absK;
+            if (n != 0){
             os << 'x';
             if (n != 1) os << '^' << n;
+            }
         }
+        // os << '\n';
     }
     return os;
 }
