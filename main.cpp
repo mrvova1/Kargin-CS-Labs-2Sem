@@ -61,6 +61,7 @@ int main() {
                 break;
         }
     }
+    std::cout << (set == set) << std::endl;
     std::cout << "Завершение работы программы." << std::endl;
     return 0;
 }

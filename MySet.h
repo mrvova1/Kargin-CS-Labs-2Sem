@@ -108,7 +108,8 @@ void MyVector<INF>::add_element(INF new_element) {
 
 template<typename INF>
 int MyVector<INF>::delete_element(size_t index) {
-    if (index >= size_ - 1) {
+    std::cout << '\n' << index << "index\n";
+    if (index >= size_) {
         std::cout << "Индекс превосходит размер массива";
         return -1;
     }
@@ -208,7 +209,7 @@ void MyVector<char*>::add_element(char* new_element) {
 
 template<>
 int MyVector<char*>::delete_element(size_t index) {
-    if (index >= size_ - 1) {
+    if (index >= size_) {
         std::cout << "Индекс превосходит размер массива";
         return -1;
     }
@@ -289,10 +290,19 @@ MySet<INF> operator-(const MySet<INF>& f_st, const MySet<INF>& s_st) {
 }
 
 template<typename INF>
-MySet<INF> operator==(const MySet<INF>& f_st, const MySet<INF>& s_st) {
+bool operator==(const MySet<INF>& f_st, const MySet<INF>& s_st) {
     if (f_st.len() != s_st.len()) return false;
     for (size_t i = 0; i < f_st.len(); ++i) {
         if (f_st[i] != s_st[i]) return false;
+    }
+    return true;
+}
+
+template<>
+bool operator==(const MySet<char *>& f_st, const MySet<char *>& s_st) {
+    if (f_st.len() != s_st.len()) return false;
+    for (size_t i = 0; i < f_st.len(); ++i) {
+        if (std::strcmp(f_st[i], s_st[i]) != 0) return false;
     }
     return true;
 }
