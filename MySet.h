@@ -194,7 +194,8 @@ int MyVector<char*>::find(char* el) {
 
 template<>
 MyVector<char*>::~MyVector() {
-    for (size_t i = 0; i < size_; ++i) delete[] pdata_[i];
+    for (size_t i = 0; i < size_; ++i)
+     delete[] pdata_[i];
     delete[] pdata_;
 }
 
@@ -213,10 +214,10 @@ int MyVector<char*>::delete_element(size_t index) {
         std::cout << "Индекс превосходит размер массива";
         return -1;
     }
+    delete[] pdata_[index];
     for (size_t i = index + 1; i < max_size_; ++i) {
         pdata_[i - 1] = pdata_[i];
     }
-    delete[] pdata_[size_ - 1];
     --size_;
     resize();
     return 0;
