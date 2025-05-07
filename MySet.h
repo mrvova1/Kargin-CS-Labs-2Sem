@@ -234,6 +234,7 @@ void Polynomial::add_term(const Term& t) {
     }
     ensure_capacity();
     terms_[size_++] = t;
+    sort_desc();
 }
 void Polynomial::sort_desc() {
     for (int i = 0; i < size_ - 1; ++i)
@@ -278,8 +279,10 @@ void Polynomial::sort_desc() {
 
 char* slice(char* s, int from, int to)
 {
-    s[to+1] = 0;
-    return s+from;
+    char copy_s[1000];
+    strcpy(copy_s, s);
+    copy_s[to+1] = 0;
+    return copy_s+from;
 };
 
 bool end(char cpol[1000], int j){
@@ -294,10 +297,25 @@ std::istream& operator>>(std::istream& is, Polynomial& poly) {
     int j = 0;
     bool short_T;
     char slice_cpol[1000];
+    bool is_number = false;
+    // bool number = false;
     while (true)
     {
-        while (cpol[j] != 'x'){ j+=1; if (end(cpol, j)) {break;}}
-        if (end(cpol, j)) {break;}
+        is_number = false;
+        // number = false;
+        while (cpol[j] != 'x'){
+            j+=1;
+            if (end(cpol, j)) {break;};
+            if (cpol[j] == '-' or cpol[j] == '+') {
+                if (is_number) {
+                    poly.add_term(Term(slice(cpol, i, j-1)));
+                    i=j;
+                    continue;
+                };
+                is_number = true;
+            }
+        }
+        if (end(cpol, j)) {poly.add_term(Term(slice(cpol, i, j-1))); break;}
         j+=1;
         // ij = j;
         short_T = false;
