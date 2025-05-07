@@ -20,11 +20,14 @@ public:
     void add_element(INF new_element);
     int delete_element(size_t index);
     int find(INF el);
-    void resize();
+    void is_resize();
+    void resize(size_t new_size);
     void sort();
 
     INF operator[](size_t num) const;
     size_t len() const;
+    template<typename I>
+    friend std::ostream& operator<<(std::ostream& os, const MyVector<I>& St);
 };
 
 template<>
@@ -38,6 +41,15 @@ void MyVector<char*>::add_element(char* new_element);
 
 template<>
 int MyVector<char*>::delete_element(size_t index);
+
+template<typename INF>
+std::ostream& operator<<(std::ostream& os, const MyVector<INF>& St) {
+    for (size_t i = 0; i < St.len(); ++i) {
+        std::cout << St[i] << ' ';
+    }
+    std::cout << std::endl;
+    return os;
+}
 
 template<typename INF>
 class MySet : public MyVector<INF> {
@@ -101,7 +113,7 @@ template<typename INF>
 void MyVector<INF>::add_element(INF new_element) {
     ++size_;
     if (size_ >= max_size_ / 2) {
-        resize();
+        is_resize();
     }
     pdata_[size_ - 1] = new_element;
 }
@@ -118,7 +130,7 @@ int MyVector<INF>::delete_element(size_t index) {
     }
     pdata_[size_ - 1] = 0;
     --size_;
-    resize();
+    is_resize();
     return 0;
 }
 
@@ -144,21 +156,22 @@ int MyVector<INF>::find(INF el) {
 }
 
 template<typename INF>
-void MyVector<INF>::resize() {
+void MyVector<INF>::is_resize() {
     while (size_ > max_size_ / 2) {
-        INF* new_pdata = new INF[max_size_ * 2];
-        for (size_t i = 0; i < max_size_; ++i) new_pdata[i] = pdata_[i];
-        delete[] pdata_;
-        pdata_ = new_pdata;
-        max_size_ *= 2;
+        resize(max_size_ * 2);
     }
     while (size_ < max_size_ / 4) {
-        INF* new_pdata = new INF[max_size_ / 2];
-        for (size_t i = 0; i < max_size_; ++i) new_pdata[i] = pdata_[i];
-        delete[] pdata_;
-        pdata_ = new_pdata;
-        max_size_ /= 2;
+        resize(max_size_ / 2);
     }
+}
+
+template<typename INF>
+void MyVector<INF>::resize(size_t new_size) {
+    INF* new_pdata = new INF[new_size];
+    for (size_t i = 0; i < max_size_; ++i) new_pdata[i] = pdata_[i];
+    delete[] pdata_;
+    pdata_ = new_pdata;
+    max_size_ = new_size;
 }
 
 template<typename INF>
@@ -202,7 +215,7 @@ MyVector<char*>::~MyVector() {
 template<>
 void MyVector<char*>::add_element(char* new_element) {
     ++size_;
-    if (size_ >= max_size_ / 2) resize();
+    if (size_ >= max_size_ / 2) is_resize();
     delete[] pdata_[size_ - 1];
     pdata_[size_ - 1] = new char[std::strlen(new_element) + 1];
     std::strcpy(pdata_[size_ - 1], new_element);
@@ -219,7 +232,7 @@ int MyVector<char*>::delete_element(size_t index) {
         pdata_[i - 1] = pdata_[i];
     }
     --size_;
-    resize();
+    is_resize();
     return 0;
 }
 
