@@ -22,6 +22,14 @@ public:
 
 Term::Term(char* cterm) {
     std::cout << cterm << '\n';
+    // std::cout << std::strlen(cterm) << '\n';
+    // std::cout << "||||||||||||||||||||||||||\n";
+    // for (size_t i = 0; i < strlen(cterm); i++){
+    //     std::cout << cterm[i] << '\n';
+    // }
+    // std::cout << "||||||||||||||||||||||||||\n";
+
+
     int pk = 1;
     int k = 0;
     int pn = 1;
@@ -46,13 +54,20 @@ Term::Term(char* cterm) {
     }
 
     for (int i = j; true; i++){
+        if (i >= static_cast<int>(strlen(cterm))) {break;}
         if (cterm[i] == ' '){
             break;
         }
         if (cterm[i] == 'x'){
             break;
         }
-        if (not isdigit(cterm[i])){
+        if (not isdigit(cterm[i]) and i < static_cast<int>(strlen(cterm))){
+            // std::cout << i;
+            // std::cout << "||||||||||||||||||||||||||\n";
+            // std::cout << '|' << cterm[i] << '|' << "\n";
+            // std::cout << "||||||||||||||||||||||||||\n";
+            // std::cout << '|' << cterm[i-1] << '|' << "\n";
+            // std::cout << "1небыло небыло\n";
             k_ = 0;
             n_ = 0;
             return;
@@ -61,7 +76,6 @@ Term::Term(char* cterm) {
         k += (static_cast<int>(cterm[i]) - static_cast<int>('0'));
         j+=1;
         is_k = true;
-
     }
 
     j+=1;
@@ -79,11 +93,13 @@ Term::Term(char* cterm) {
         j += 1;
     }
     for (int i = j; i < static_cast<int>(std::strlen(cterm)); i++){
+        if (i >= static_cast<int>(strlen(cterm))) {break;}
         if (cterm[i] == ' '){
             break;
         }
 
         if (not isdigit(cterm[i])){
+            std::cout << "3небыло небыло\n";
             k_ = 0;
             n_ = 0;
             return;
@@ -99,6 +115,8 @@ Term::Term(char* cterm) {
     if (not is_k) {
         k_ = pk;
     }
+    std::cout << *this;
+    std::cout << "\nбыло было\n";
     return;
 }
 
@@ -187,11 +205,10 @@ std::ostream& operator<<(std::ostream& os, const Term& term) {
         return os;
     }
     if (n == 0) {
-        os << k << 'x';
+        os << k;
         return os;
     }
-    if (k <= -1) os << '-';
-    else if (k != 1) os << k;
+    if (k != 1 and k != -1) os << k;
     os << 'x';
     if (n != 1) os << '^' << n;
     return os;
@@ -279,10 +296,8 @@ void Polynomial::sort_desc() {
 
 char* slice(char* s, int from, int to)
 {
-    char copy_s[1000];
-    strcpy(copy_s, s);
-    copy_s[to+1] = 0;
-    return copy_s+from;
+    s[std::min(to+1, static_cast<int>(strlen(s)))] = '\0';
+    return s+from;
 };
 
 bool end(char cpol[1000], int j){
@@ -301,6 +316,7 @@ std::istream& operator>>(std::istream& is, Polynomial& poly) {
     // bool number = false;
     while (true)
     {
+        std::strcpy(slice_cpol, cpol);
         is_number = false;
         // number = false;
         while (cpol[j] != 'x'){
@@ -308,23 +324,23 @@ std::istream& operator>>(std::istream& is, Polynomial& poly) {
             if (end(cpol, j)) {break;};
             if (cpol[j] == '-' or cpol[j] == '+') {
                 if (is_number) {
-                    poly.add_term(Term(slice(cpol, i, j-1)));
+                    poly.add_term(Term(slice(slice_cpol, i, j-1)));
                     i=j;
                     continue;
                 };
                 is_number = true;
             }
         }
-        if (end(cpol, j)) {poly.add_term(Term(slice(cpol, i, j-1))); break;}
+        std::strcpy(slice_cpol, cpol);
+        if (end(cpol, j)) {poly.add_term(Term(slice(slice_cpol, i, j-1))); break;}
         j+=1;
         // ij = j;
         short_T = false;
         while (cpol[j] != '^'){j+=1; if (cpol[j] == '-' or cpol[j] == '+') {j-=1; short_T = true; break;} }
         j+=1;
-        if (short_T) { poly.add_term(Term(slice(cpol, i, j+1))); i=j+1; continue; }
+        if (short_T) { poly.add_term(Term(slice(slice_cpol, i, j+1))); i=j+1; continue; }
         while (cpol[j] == ' '){ j+=1; }
         while (isdigit(cpol[j])){ j+=1; }
-        std::strcpy(slice_cpol, cpol);
         Term s = Term(slice(slice_cpol, i, j+1));
         poly.add_term(s); i=j+1; continue;
     }
