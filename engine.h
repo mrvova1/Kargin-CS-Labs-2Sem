@@ -18,7 +18,7 @@ protected:
     double displacement;
     double power;
 public:
-    InternalCombustionEngine(double d, double p)
+    InternalCombustionEngine(double d=0, double p=0)
         : displacement(d), power(p) {
         std::cout << "InternalCombustionEngine()" << std::endl;
     }
@@ -34,7 +34,7 @@ class DieselEngine : public InternalCombustionEngine {
 protected:
     double compressionRatio;
 public:
-    DieselEngine(double d, double p, double cr)
+    DieselEngine(double d=0, double p=0, double cr=0)
         : InternalCombustionEngine(d, p), compressionRatio(cr) {
         std::cout << "DieselEngine()" << std::endl;
     }
@@ -52,7 +52,7 @@ class TurbojetEngine : public Engine {
 protected:
     double thrust;
 public:
-    TurbojetEngine(double t)
+    TurbojetEngine(double t=0)
         : thrust(t) {
         std::cout << "TurbojetEngine()" << std::endl;
     }
@@ -64,50 +64,169 @@ public:
     }
 };
 
-template<typename T>
-class Vector {
+
+template<class INF, class FRIEND>
+class ListNode {
 private:
-    T* data;
-    size_t sz;
-    size_t cap;
-    void resize(size_t newCap) {
-        T* newData = new T[newCap];
-        for (size_t i = 0; i < sz; ++i) newData[i] = data[i];
-        delete[] data;
-        data = newData;
-        cap = newCap;
+    INF d;
+    ListNode *next;
+
+    ListNode() : next(nullptr) {}
+
+    ListNode(const ListNode &other) : d(other.d), next(nullptr) {
+        if(other.next)
+            next = new ListNode(*other.next);
     }
-public:
-    Vector() : data(nullptr), sz(0), cap(0) {}
-    ~Vector() {
-        clear();
-        delete[] data;
-    }
-    void print() {
-        for (size_t i = 0; i < size(); ++i) {
-            std::cout << "[" << i << "] ";
-            data[i]->show();
+
+    ListNode& operator=(const ListNode &other) {
+        if(this != &other) {
+            d = other.d;
+            if(next) {
+                delete next;
+                next = nullptr;
+            }
+            if(other.next)
+                next = new ListNode(*other.next);
         }
+        return *this;
     }
-    void push_back(const T& v) {
-        if (sz == cap)
-            resize(cap == 0 ? 1 : cap * 2);
-        data[sz++] = v;
-    }
-    void remove(size_t index) {
-        if (index >= sz) return;
-        delete data[index];
-        for (size_t i = index; i + 1 < sz; ++i)
-            data[i] = data[i + 1];
-        --sz;
-    }
-    void clear() {
-        for (size_t i = 0; i < sz; ++i)
-            delete data[i];
-        sz = 0;
-    }
-    size_t size() const { return sz; }
-    T& operator[](size_t i) { return data[i]; }
+
+    ~ListNode() {
+        delete d;
+        delete next;
+     }
+
+    friend FRIEND;
 };
 
-#endif // ENGINE_H
+template<class INF>
+class MyStack {
+    typedef ListNode<INF, MyStack<INF>> Node;
+    Node *top;
+public:
+    MyStack() : top(nullptr) {}
+
+    MyStack(const MyStack &other) : top(nullptr) {
+        for (size_t i=0; i < other.len(); i++){
+            push(other[i]);
+        }
+    }
+
+    MyStack& operator=(MyStack &other) {
+        if(this != &other) {
+            // this->empty();
+            // other.empty();
+
+            while(!empty()) {
+                pop();
+            }
+            // for (size_t i=0; i < other.len(); i++){
+            //     push(other[i]);
+            // }
+            while (!other.empty())
+            {
+               push(other.top());
+               other.pop();
+            //    std::cout << this;
+            }
+            inverted();
+            // Node copy_node = other;
+            // if (!copy_node){
+            //     top = nullptr;
+            // } else {
+            // while (copy_node) {
+            //     push(copy_node);
+            //     top = copy_node;
+            //     copy_node = copy_node->next;
+                // top = new Node(*other.top);
+            // }
+        }
+        return *this;
+    // }
+}
+
+    ~MyStack() {
+        while(top != nullptr) {
+            Node *temp = top;
+            top = top->next;
+            temp->next = nullptr;
+            delete temp;
+        }
+    }
+
+    bool empty() const {
+        return (top == nullptr);
+    }
+
+    bool push(INF n) {
+        Node* newNode = new Node;
+        newNode->d = n;
+        newNode->next = top;
+        top = newNode;
+        return true;
+    }
+
+    bool pop() {
+        // std::cout << "\\\\\\" << '\n';
+        if(empty()){
+            return false;
+        }
+        Node* temp = top;
+        top = top->next;
+        temp->next = nullptr;
+        delete temp;
+        // std::cout << n << '\n';
+        return true;
+    }
+
+    INF top_inf() const {
+        if(empty())
+            throw "Stack is empty";
+        return top->d;
+    }
+
+    size_t len() const {
+        size_t len = 0;
+        Node *temp = top;
+        while(temp != nullptr) {
+            temp = temp->next;
+            len++;
+        }
+        return len;
+    }
+
+    void inverted() {
+        Node *temp = top;
+        Node *temp_now = top;
+        Node *back = nullptr;
+        while (temp != nullptr){
+            temp_now = temp;
+            temp = temp->next;
+            temp_now->next = back;
+            back = temp_now;
+        }
+        top = back;
+    }
+
+    INF operator [] (int num) const {
+        Node *temp = top;
+        for (int i=0; i<num; i++){
+            temp = temp->next;
+        }
+        return temp->d;
+    }
+
+    template<class I>
+    friend std::ostream& operator<<(std::ostream &os, const MyStack<I>& St);
+
+};
+
+template<class INF>
+std::ostream& operator<<(std::ostream &os, const MyStack<INF>& St){
+    for (size_t i = 0; i < St.len(); i++) {
+        std::cout << St[i] << ' ';
+    }
+    std::cout << std::endl;
+    return os;
+}
+#endif // engine

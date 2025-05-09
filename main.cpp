@@ -1,70 +1,68 @@
 #include "engine.h"
 
 
+// int main() {
+//     MyStack<Engine*> container;
+
+//     container.push(new InternalCombustionEngine(2.5, 180));
+//     container.push(new DieselEngine(3.0, 220, 17.5));
+//     container.push(new TurbojetEngine(150.0));
+
+//     std::cout << "\n--- print() ---" << std::endl;
+//     container.print();
+
+//     std::cout << "\n--- removeAt index 1 ---" << std::endl;
+//     container.remove(1);
+//     container.print();
+
+//     std::cout << "\n--- clearAll() ---" << std::endl;
+//     container.clear();
+//     std::cout << "Container size after clear: " << container.size() << std::endl;
+
+//     return 0;
+// }
+
 int main() {
-    Vector<Engine*> container;
-
-    container.push_back(new InternalCombustionEngine(2.5, 180));
-    container.push_back(new DieselEngine(3.0, 220, 17.5));
-    container.push_back(new TurbojetEngine(150.0));
-
-    std::cout << "\n--- print() ---" << std::endl;
-    container.print();
-
-    std::cout << "\n--- removeAt index 1 ---" << std::endl;
-    container.remove(1);
-    container.print();
-
-    std::cout << "\n--- clearAll() ---" << std::endl;
-    container.clear();
-    std::cout << "Container size after clear: " << container.size() << std::endl;
-
-    return 0;
-}
-
-int main() {
-    Vector<Engine*> container;
+    MyStack<Engine*> container;
 
     std::cout << "Демонстрация работы" << std::endl;
-
+    int choice;
     bool running = true;
     while(running) {
         std::cout << "Меню:\n";
-        std::cout << "1) Добавить элемент\n";
-        std::cout << "2) Удалить элемент\n";
-        std::cout << "3) Показать множество\n";
+        std::cout << "1) Добавить InternalCombustionEngine\n";
+        std::cout << "2) Добавить DieselEngine\n";
+        std::cout << "3) Добавить TurbojetEngine\n";
+        std::cout << "4) Удалить элемент\n";
+        std::cout << "5) Показать множество\n";
         std::cout << "0) Выход\n";
         std::cout << "Ваш выбор: ";
         std::cin >> choice;
+        std::cout << "\n";
+
 
         switch(choice) {
             case 1:
                 std::cin.ignore();
-                std::cout << "Введите элемент для добавления: ";
-                std::cin >> element;
-                // std::cout << "Введите элемент для добавления: ";
-
-                if (set.add_element(element)) {
-                    std::cout << "Элемент " << element << " добавлен" << std::endl;
-                } else {
-                    std::cout << "Элемент " << element << " уже в массиве" << std::endl;
-                }
-                // std::cout << "Введите элемент для добавления: ";
-
+                container.push(new InternalCombustionEngine(2.5, 180));
                 break;
             case 2:
                 std::cin.ignore();
-                std::cout << "Введите элемент для удаления: ";
-                std::cin >> element;
-                if (set.delete_element(element)) {
-                    std::cout << "Элемент " << element << " удалён" << std::endl;
-                } else {
-                    std::cout << "Элемент " << element << " не присутствовал в массиве" << std::endl;
-                }
+                container.push(new DieselEngine(3.0, 220, 17.5));
                 break;
             case 3:
                 std::cin.ignore();
-                std::cout << "Множество: " << set;
+                container.push(new TurbojetEngine(150.0));
+                break;
+            case 4:
+                std::cin.ignore();
+                container.pop();
+                break;
+            case 5:
+                std::cin.ignore();
+                for (size_t i=0; i < container.len(); i++){
+                    container[i]->show();
+                }
                 break;
             case 0:
                 std::cin.ignore();
@@ -75,7 +73,11 @@ int main() {
                 std::cout << "Неверный выбор. Повторите ввод." << std::endl;
                 break;
         }
+        std::cout << "\n";
     }
     std::cout << "Завершение работы программы." << std::endl;
+    for (size_t i=0; i < container.len(); i++){
+        container.pop();
+    }
     return 0;
 }
