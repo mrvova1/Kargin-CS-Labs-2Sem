@@ -19,7 +19,7 @@ public:
 
     void add_element(INF new_element);
     int delete_element(size_t index);
-    int find(INF el);
+    int find(INF el) const;
     void is_resize();
     void resize(size_t new_size);
     void sort();
@@ -31,7 +31,7 @@ public:
 };
 
 template<>
-int MyVector<char*>::find(char* el);
+int MyVector<char*>::find(char* el) const;
 
 template<>
 MyVector<char*>::~MyVector();
@@ -41,6 +41,7 @@ void MyVector<char*>::add_element(char* new_element);
 
 template<>
 int MyVector<char*>::delete_element(size_t index);
+
 
 template<typename INF>
 std::ostream& operator<<(std::ostream& os, const MyVector<INF>& St) {
@@ -54,7 +55,7 @@ std::ostream& operator<<(std::ostream& os, const MyVector<INF>& St) {
 template<typename INF>
 class MySet : public MyVector<INF> {
 public:
-    bool is_element(INF el);
+    bool is_element(INF el) const;
     bool add_element(INF el);
     bool delete_element(INF el);
 
@@ -104,8 +105,47 @@ MyVector<INF>& MyVector<INF>::operator=(const MyVector& other) {
     return *this;
 }
 
+template<>
+MyVector<char*>::MyVector(const MyVector<char*>& other)
+    : max_size_(other.max_size_), size_(other.size_), pdata_(new char*[other.max_size_])
+{
+    for (size_t i = 0; i < size_; ++i) {
+        size_t len = std::strlen(other.pdata_[i]) + 1;
+        pdata_[i] = new char[len];
+        std::strcpy(pdata_[i], other.pdata_[i]);
+    }
+}
+
+template<>
+MyVector<char*>& MyVector<char*>::operator=(const MyVector<char*>& other) {
+    if (this != &other) {
+        for (size_t i = 0; i < size_; ++i) {
+            delete[] pdata_[i];
+        }
+        max_size_ = other.max_size_;
+        size_ = other.size_;
+        delete[] pdata_;
+        pdata_ = new char*[max_size_];
+        for (size_t i = 0; i < size_; ++i) {
+            // size_t len = std::strlen(other.pdata_[i]) + 1;
+            // char* copy = new char[len];
+            std::strcpy(pdata_[i], other.pdata_[i]);
+            // pdata_[i] = copy;
+        }
+    }
+    return *this;
+}
+
 template<typename INF>
 MyVector<INF>::~MyVector() {
+    delete[] pdata_;
+}
+
+template<>
+MyVector<char*>::~MyVector() {
+    for (size_t i = 0; i < size_; ++i) {
+        delete[] pdata_[i];
+    }
     delete[] pdata_;
 }
 
@@ -135,7 +175,7 @@ int MyVector<INF>::delete_element(size_t index) {
 }
 
 template<typename INF>
-int MyVector<INF>::find(INF el) {
+int MyVector<INF>::find(INF el) const {
     if (size_ == 0) return -1;
     int left_b = 0;
     int right_b = size_ - 1;
@@ -156,7 +196,7 @@ int MyVector<INF>::find(INF el) {
 }
 
 template<typename INF>
-void MyVector<INF>::is_resize() {
+void MyVector<INF>::is_resize(){
     while (size_ > max_size_ / 2) {
         resize(max_size_ * 2);
     }
@@ -168,7 +208,7 @@ void MyVector<INF>::is_resize() {
 template<typename INF>
 void MyVector<INF>::resize(size_t new_size) {
     INF* new_pdata = new INF[new_size];
-    for (size_t i = 0; i < max_size_; ++i) new_pdata[i] = pdata_[i];
+    for (size_t i = 0; i < size_; ++i) new_pdata[i] = pdata_[i];
     delete[] pdata_;
     pdata_ = new_pdata;
     max_size_ = new_size;
@@ -198,26 +238,35 @@ size_t MyVector<INF>::len() const {
 }
 
 template<>
-int MyVector<char*>::find(char* el) {
+int MyVector<char*>::find(char* el) const {
     for (size_t i = 0; i < size_; ++i) {
+        std::cout<<pdata_[i] << '\n';
         if (std::strcmp(pdata_[i], el) == 0) return i;
     }
     return -1;
 }
 
-template<>
-MyVector<char*>::~MyVector() {
-    for (size_t i = 0; i < size_; ++i)
-     delete[] pdata_[i];
-    delete[] pdata_;
-}
+// template<>
+// MyVector<char*>::~MyVector() {
+//     for (size_t i = 0; i < size_; ++i)
+//      delete[] pdata_[i];
+//     delete[] pdata_;
+// }
+
+// template<>
+// MyVector<const char*>::~MyVector() {
+//     for (size_t i = 0; i < size_; ++i) {
+//         std::cout << pdata_[i];
+//         delete[] pdata_[i];
+//     }
+//     delete[] pdata_;
+// }
 
 template<>
 void MyVector<char*>::add_element(char* new_element) {
     ++size_;
     if (size_ >= max_size_ / 2) is_resize();
-    delete[] pdata_[size_ - 1];
-    pdata_[size_ - 1] = new char[std::strlen(new_element) + 1];
+    pdata_[size_-1] = new char[std::strlen(new_element) + 1];
     std::strcpy(pdata_[size_ - 1], new_element);
 }
 
@@ -227,9 +276,11 @@ int MyVector<char*>::delete_element(size_t index) {
         std::cout << "Индекс превосходит размер массива";
         return -1;
     }
+    std::cout << find(pdata_[index]) << "||||||||||||||||||||||";
+    std::cout << "Смерть";
     delete[] pdata_[index];
-    for (size_t i = index + 1; i < max_size_; ++i) {
-        pdata_[i - 1] = pdata_[i];
+    for (size_t i = index; i < size_; ++i) {
+        pdata_[i] = pdata_[i+1];
     }
     --size_;
     is_resize();
@@ -237,7 +288,7 @@ int MyVector<char*>::delete_element(size_t index) {
 }
 
 template<typename INF>
-bool MySet<INF>::is_element(INF el) {
+bool MySet<INF>::is_element(INF el) const {
     if (this->len() == 0) return false;
     return this->find(el) != -1;
 }
