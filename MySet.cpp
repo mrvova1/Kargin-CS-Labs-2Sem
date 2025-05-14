@@ -15,5 +15,7 @@ int main() {
     std::cout << "Сумма: " << sum << "\n";
     Polynomial prod = p1 * p2;
     std::cout << "Произведение: " << prod << "\n";
+    Polynomial raz = p1 - p2;
+    std::cout << "Разность: " << raz << "\n";
     return 0;
 }

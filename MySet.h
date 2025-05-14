@@ -14,11 +14,21 @@ public:
     Term(char* cterm);
     int degree() const;
     int coeff() const;
+    int get_n_();
+    int get_k_();
     Term& operator+=(const Term& other);
     friend Term operator+(const Term& a, const Term& b);
     friend std::istream& operator>>(std::istream& is, Term& term);
     friend std::ostream& operator<<(std::ostream& os, const Term& term);
 };
+
+int Term::get_n_(){
+    return n_;
+}
+
+int Term::get_k_(){
+    return k_;
+}
 
 Term::Term(char* cterm) {
     std::cout << cterm << '\n';
@@ -36,6 +46,7 @@ Term::Term(char* cterm) {
     int n = 0;
     int j = 0;
     bool is_k = false;
+    bool is_n = false;
 
     while (cterm[j] == ' ')
     {
@@ -107,16 +118,20 @@ Term::Term(char* cterm) {
         n *= 10;
         n += (static_cast<int>(cterm[i]) - static_cast<int>('0'));
         j+=1;
+        is_n = true;
     }
 
     // term = Term(k * pk, n * pn);
     k_ = k * pk;
     n_ = n * pn;
-    if (not is_k) {
+    if (not is_k and is_n) {
         k_ = pk;
     }
+    if (k_ == 0){
+        n_ = 0;
+    }
     std::cout << *this;
-    std::cout << "\nбыло было\n";
+    std::cout << "\n||||||||||||\n";
     return;
 }
 
@@ -135,6 +150,7 @@ public:
     void add_term(const Term& t);
     friend Polynomial operator+(const Polynomial& a, const Polynomial& b);
     friend Polynomial operator*(const Polynomial& a, const Polynomial& b);
+    friend Polynomial operator-(const Polynomial& a, const Polynomial& b);
     friend std::istream& operator>>(std::istream& is, Polynomial& poly);
     friend std::ostream& operator<<(std::ostream& os, const Polynomial& poly);
 };
@@ -354,6 +370,7 @@ std::ostream& operator<<(std::ostream& os, const Polynomial& poly) {
         // std::cout << poly.terms_[i] << '\n';
 
         int k = poly.terms_[i].coeff();
+        if (k == 0) {continue;}
         int n = poly.terms_[i].degree();
         if (i > 0) os << (k >= 0 ? " + " : " - ");
         else if (k < 0) os << '-';
@@ -374,6 +391,15 @@ std::ostream& operator<<(std::ostream& os, const Polynomial& poly) {
 Polynomial operator+(const Polynomial& a, const Polynomial& b) {
     Polynomial r = a;
     for (int i = 0; i < b.size_; ++i) r.add_term(b.terms_[i]);
+    r.sort_desc();
+    return r;
+}
+Polynomial operator-(const Polynomial& a, const Polynomial& b) {
+    Polynomial r = a;
+    for (int i = 0; i < b.size_; ++i){
+        Term new_Term(-b.terms_[i].get_k_(), b.terms_[i].get_n_());
+        r.add_term(new_Term);
+    }
     r.sort_desc();
     return r;
 }
