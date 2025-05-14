@@ -2,112 +2,153 @@
 #define ENGINE_H
 
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
 
-
-class Engine {
-protected:
-    Engine() { std::cout << "Engine()" << std::endl; }
-public:
-    virtual ~Engine() { std::cout << "~Engine()" << std::endl; }
-    virtual void show() const = 0;
-};
-
-
-class InternalCombustionEngine : public Engine {
-protected:
-    double displacement;
-    double power;
-public:
-    InternalCombustionEngine(double d, double p)
-        : displacement(d), power(p) {
-        std::cout << "InternalCombustionEngine()" << std::endl;
-    }
-    ~InternalCombustionEngine() override {
-        std::cout << "~InternalCombustionEngine()" << std::endl;
-    }
-    void show() const override {
-        std::cout << "ICE: " << displacement << "L, " << power << "hp" << std::endl;
-    }
-};
-
-class DieselEngine : public InternalCombustionEngine {
-protected:
-    double compressionRatio;
-public:
-    DieselEngine(double d, double p, double cr)
-        : InternalCombustionEngine(d, p), compressionRatio(cr) {
-        std::cout << "DieselEngine()" << std::endl;
-    }
-    ~DieselEngine() override {
-        std::cout << "~DieselEngine()" << std::endl;
-    }
-    void show() const override {
-        std::cout << "Diesel: "
-                  << displacement << "L, " << power << "hp, CR="
-                  << compressionRatio << std::endl;
-    }
-};
-
-class TurbojetEngine : public Engine {
-protected:
-    double thrust;
-public:
-    TurbojetEngine(double t)
-        : thrust(t) {
-        std::cout << "TurbojetEngine()" << std::endl;
-    }
-    ~TurbojetEngine() override {
-        std::cout << "~TurbojetEngine()" << std::endl;
-    }
-    void show() const override {
-        std::cout << "Turbojet: " << thrust << " kN thrust" << std::endl;
-    }
-};
-
-template<typename T>
-class Vector {
-private:
-    T* data;
-    size_t sz;
-    size_t cap;
-    void resize(size_t newCap) {
-        T* newData = new T[newCap];
-        for (size_t i = 0; i < sz; ++i) newData[i] = data[i];
-        delete[] data;
-        data = newData;
-        cap = newCap;
-    }
-public:
-    Vector() : data(nullptr), sz(0), cap(0) {}
-    ~Vector() {
-        clear();
-        delete[] data;
-    }
-    void print() {
-        for (size_t i = 0; i < size(); ++i) {
-            std::cout << "[" << i << "] ";
-            data[i]->show();
+int s_count(std::string &first_s, std::string &second_s){
+    int count = 0;
+    char last_s = second_s[second_s.length()-1];
+    for (size_t i = 0; i < first_s.length(); i++){
+        if (first_s[i] == last_s) {
+            count++;
         }
     }
-    void push_back(const T& v) {
-        if (sz == cap)
-            resize(cap == 0 ? 1 : cap * 2);
-        data[sz++] = v;
+    return count;
+}
+
+int first(){
+    std::string first_s;
+    std::string second_s;
+    std::getline(std::cin, first_s);
+    std::getline(std::cin, second_s);
+    return s_count(first_s, second_s);
+}
+
+std::string s_info(std::string &first_s){
+    std::string info;
+    bool start = false;
+    bool end = false;
+    char c;
+    for (size_t i = 0; i < first_s.length(); i++){
+        c = first_s[i];
+        if (c == ',') {
+            end = true;
+        }
+        if (end) {break;}
+        if (start) {info.push_back(c);}
+        if (c == ' ') {
+            start = true;
+        }
     }
-    void remove(size_t index) {
-        if (index >= sz) return;
-        delete data[index];
-        for (size_t i = index; i + 1 < sz; ++i)
-            data[i] = data[i + 1];
-        --sz;
+    return info;
+}
+
+std::string second(){
+    std::string first_s;
+    std::getline(std::cin, first_s);
+    return s_info(first_s);
+}
+
+void file_numerate(std::string &filename){
+    std::ifstream in(filename);
+    std::ofstream out("numerated_" + filename);
+    if (not out.is_open() or not in.is_open()){
+        return;
     }
-    void clear() {
-        for (size_t i = 0; i < sz; ++i)
-            delete data[i];
-        sz = 0;
+    std::string line;
+    int count = 0;
+    while (std::getline(in, line))
+    {
+        out << count << ". " << line << std::endl;
+        count++;
     }
-    size_t size() const { return sz; }
-    T& operator[](size_t i) { return data[i]; }
+    out.close();
+    in.close();
+}
+
+void third(){
+    std::string first_s;
+    std::getline(std::cin, first_s);
+    file_numerate(first_s);
+}
+
+std::vector<float> vector_summ(std::vector<float> &first_v, std::vector<float> &second_v){
+    std::vector<float> third_v;
+    for (size_t i=0; i<std::min(first_v.size(), second_v.size()); i++) {
+        third_v.push_back(first_v[i]+second_v[i]);
+    }
+    return third_v;
+}
+
+void fourth_print(std::vector<float> vector){
+    for (size_t i=0; i < vector.size(); i++){
+        std::cout << vector[i] << ' ';
+    }
+    std::cout << '\n';
+}
+
+void fourth(){
+    std::vector<float> first_v;
+    std::vector<float> second_v;
+    std::vector<float> third_v;
+    float number = 1.0;
+    for (int i=0; i < 25; i++){
+        number *= static_cast<float>(i) + 0.1;
+        first_v.push_back(number);
+        second_v.push_back(number*0.52);
+    }
+    third_v = vector_summ(first_v, second_v);
+    fourth_print(first_v);
+    fourth_print(second_v);
+    fourth_print(third_v);
+}
+
+class Planet {
+public:
+    std::string name_;
+    int satelites_;
+
+    Planet(std::string name="", int satelites = 0): name_(name), satelites_(satelites) {};
 };
+
+void fivth_print(std::vector<Planet> vector){
+    for (size_t i=0; i < vector.size(); i++){
+        std::cout << vector[i].name_ << ' ' << vector[i].satelites_ << '\n';
+    }
+}
+
+int main(){
+    // std::cout << first();
+    // std::cout << second() << '\n';
+    // third();
+    // fourth();
+
+    // std::vector<Planet> planets;
+    // planets.push_back(Planet("Меркурий", 0));
+    // planets.push_back(Planet("Венера", 0));
+    // planets.push_back(Planet("Земля", 1));
+    // planets.push_back(Planet("Марс", 2));
+    // planets.push_back(Planet("Юпитер", 69));
+    // planets.push_back(Planet("Сатурн", 62));
+    // planets.push_back(Planet("Уран", 27));
+    // planets.push_back(Planet("Нептун", 14));
+    // planets.push_back(Planet("Плутон", 10));
+    // fivth_print(planets);
+    // std::cout << '\n';
+    // int max_sat = -1;
+    // Planet max_plan = Planet();
+    // for (size_t i=0; i < planets.size(); i++){
+    //     if (planets[i].satelites_) {
+    //         max_sat = planets[i].satelites_;
+    //         max_plan = planets[i];
+    //     }
+    // }
+    // std::cout << max_plan.name_ << max_plan.satelites_ <<  '\n';
+
+
+
+    return 0;
+}
 
 #endif // ENGINE_H
