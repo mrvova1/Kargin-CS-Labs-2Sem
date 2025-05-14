@@ -56,11 +56,14 @@ int main() {
                 break;
             case 4:
                 std::cin.ignore();
-                container.pop();
+                int index;
+                std::cin >> index;
+                container.delete_el(index);
                 break;
             case 5:
                 std::cin.ignore();
                 for (size_t i=0; i < container.len(); i++){
+                    std::cout << i << ") ";
                     container[i]->show();
                 }
                 break;

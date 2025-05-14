@@ -216,6 +216,18 @@ public:
         return temp->d;
     }
 
+    void delete_el(size_t index){
+        Node *temp = top;
+        Node *now_temp = top;
+        for (size_t i=0; i<index; i++){
+            now_temp = temp;
+            temp = temp->next;
+        }
+        now_temp->next = temp->next;
+        temp->next = nullptr;
+        delete temp;
+    }
+
     template<class I>
     friend std::ostream& operator<<(std::ostream &os, const MyStack<I>& St);
 
