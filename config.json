@@ -1,0 +1,11 @@
+{
+  "weights": {
+    "views": 0.3,
+    "time": 0.2,
+    "ratings": 0.5
+  },
+  "tailFraction": 0.2,
+  "temperature": 1.0,
+  "alpha": 0.8,
+  "experimentFlags": ["useGraph", "useRL"]
+}
