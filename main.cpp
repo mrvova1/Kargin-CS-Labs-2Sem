@@ -1,27 +1,5 @@
 #include "engine.h"
 
-
-// int main() {
-//     MyStack<Engine*> container;
-
-//     container.push(new InternalCombustionEngine(2.5, 180));
-//     container.push(new DieselEngine(3.0, 220, 17.5));
-//     container.push(new TurbojetEngine(150.0));
-
-//     std::cout << "\n--- print() ---" << std::endl;
-//     container.print();
-
-//     std::cout << "\n--- removeAt index 1 ---" << std::endl;
-//     container.remove(1);
-//     container.print();
-
-//     std::cout << "\n--- clearAll() ---" << std::endl;
-//     container.clear();
-//     std::cout << "Container size after clear: " << container.size() << std::endl;
-
-//     return 0;
-// }
-
 int main() {
     MyStack<Engine*> container;
 
