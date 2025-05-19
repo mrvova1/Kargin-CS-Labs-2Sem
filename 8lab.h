@@ -1,5 +1,5 @@
-#ifndef ENGINE_H
-#define ENGINE_H
+#ifndef LAB8_H
+#define LAB8_H
 
 #include <iostream>
 #include <fstream>
@@ -13,8 +13,10 @@
 int s_count(std::string &first_s, std::string &second_s){
     int count = 0;
     char last_s = second_s[second_s.length()-1];
-    while (first_s.find(last_s, count) != std::string::npos)
+    int last_i = 0;
+    while (first_s.find(last_s, last_i) != std::string::npos)
     {
+        last_i = first_s.find(last_s, last_i)+1;
         count++;
         // std::cout <<
     }
@@ -45,7 +47,7 @@ std::string s_info(std::string &first_s){
     if (space >= comma){ return "";}
 
 
-    return first_s.substr(space+1, comma-space);
+    return first_s.substr(space+1, comma-space-1);
 
     // bool start = false;
     // bool end = false;
@@ -327,4 +329,4 @@ int main(){
     return 0;
 }
 
-#endif // ENGINE_H
+#endif // LAB8_H
