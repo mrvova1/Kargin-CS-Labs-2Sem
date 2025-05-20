@@ -1,6 +1,5 @@
-#define MYSTACK_H
 #include <iostream>
-#include "MySet.h"
+#include "Polynomial.h"
 
 int main() {
     Polynomial p1;

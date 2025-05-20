@@ -1,5 +1,5 @@
-#ifndef MYSET_H
-#define MYSET_H
+#ifndef Polynomial_H
+#define Polynomial_H
 
 #include <iostream>
 #include <cstring>
@@ -413,4 +413,4 @@ Polynomial operator*(const Polynomial& a, const Polynomial& b) {
     return r;
 }
 
-#endif // MYSET_H
+#endif // Polynomial_H
